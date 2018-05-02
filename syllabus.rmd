@@ -1,0 +1,72 @@
+---
+title: "Course title: Generalized and linear mixed models for biologists"
+output: rtf_document
+csl: apa.csl
+bibliography: [glmm.bib]
+header-includes:
+    - \usepackage[utf8]{inputenc}
+---
+
+## Learning outcomes (knowledge, skills, social competence and attitude):
+
+The student understands the theoretical framework for statistical methods applied to the biological sciences, specifically generalized linear models for count and binomial data and mixed models for clustered data.
+
+* Skills
+
+The student can:
+
+- effectively create exploratory, diagnostic, and expository graphs from data
+- choose and execute an appropriate statistical analysis for a given set of data and scientific questions
+- execute, trouble-shoot, and interpret the results of generalized, linear mixed, and generalized linear mixed models.
+
+* Social competence and attitude
+
+The student can:
+
+- communicate the scientific questions to be asked, justify and explain the connection to the results of a statistical analysis
+- appreciate the importance of rigorous and ethical approaches to statistical analysis, avoiding data snooping
+
+## Prerequisites:
+
+Theoretical knowledge and practical skills in applying statistical methods at the basic level:
+
+* understanding basic concepts (types of measurement scales, probability, basic types of distributions, central limit theorem, measures of central tendency and dispersion, variance, standard deviation, standard error, confidence interval, parameter, estimator, statistical test, statistical null and alternative hypotheses, type I and type II errors, significance level);
+* understanding and practical ability to perform basic statistical analyses (e.g. Student's t-test)
+* understanding of basic linear models and their implementation in R: simple analysis of regression and correlation, simple analysis of variance, multiple regression and ANCOVA.
+* Basic proficiency in the R programming language. 
+
+## Full description (=content of the course):
+
+* exploratory graphics using `ggplot` [@wickham2009,@cleveland_visualizing_1993]
+	* intro to quantitative display: graphical hierarchies
+	* ggplot basics
+	* intermediate ggplot: smooths and facets
+* introduction/review of generalized linear models [@McCullaghNelder1989,@faraway_extending_2006,@dobson_introduction_2008,@hardin_generalized_2007]
+	* links and families
+	* estimation basics
+	* parameterizing linear models: scales and contrasts
+	* model diagnostics
+	* testing hypotheses and interpreting results
+* GLMs for count data
+    * Poisson models
+    * log link function: interpretation and back-transformation
+	* diagnosing overdispersion
+	* solutions for overdispersion: quasi-likelihood, negative binomial
+	* offsets
+* GLMs for binomial and binary data
+    * binomial models
+    * overdispersion in binomial models
+    * challenges of binary data
+	     * goodness-of-fit, diagnostics
+	     * complete separation
+    * offsets for survival models		 
+* zero-inflated models
+* alternative families and links
+* mixed models [@gelman_data_2006,@zuur_mixed_2009]
+	* mixed model basics
+	* graphics
+	* frequentist estimation (`lme4` and `glmmTMB`)
+	* Bayesian estimation (`MCMCglmm` and `brms`)
+
+## Bibliography
+
