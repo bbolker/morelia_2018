@@ -1,0 +1,42 @@
+---
+title: "Setup for GLMM course"
+---
+
+Please make sure you have the **latest version** of R (3.5.0) installed from [CRAN](https://cran.r-project.org/).
+
+The RStudio interface is strongly recommended; you can download it [here](https://www.rstudio.com/products/rstudio/download/) (get the free Desktop version).
+
+Install primary GLMM-fitting packages (and a variety of extras):
+
+```{r pkg1,eval=FALSE}
+## modeling packages
+mod_pkgs <- c("bbmle","blme","brms","gamm4","glmmLasso","glmmML",
+              "lme4","glmmTMB","MCMCglmm","robustlmm",
+              "spaMM")
+## miscellaneous/data manipulation
+data_pkgs <- c("tidyverse","reshape2","plyr", "benchmark",
+               "emdbook","SASmixed","devtools", "brglm")
+## model processing/diagnostics/reporting
+diag_pkgs <- c("afex","agridat", "AICcmodavg", "aods3", "cAIC4", "coda",
+               "DHARMa", "effects", "emmeans", "multcomp", "arm", "car",
+               "Hmisc","HLMdiag","stargazer","texreg","rockchalk",
+               "RLRsim","pbkrtest","lmerTest","broom")
+## graphics
+graph_pkgs <- c("dotwhisker","ggplot2","ggstance","GGally","cowplot",
+                "gridExtra","plotrix","dotwhisker","plotMCMC",
+                "ggpubr","ggalt")
+all_pkgs <- c(mod_pkgs,data_pkgs,diag_pkgs,graph_pkgs)
+avail_pkgs <- rownames(available.packages())
+already_installed <- rownames(installed.packages())
+to_install <- setdiff(all_pkgs,already_installed)
+if (length(to_install)>0) {
+    install.packages(to_install,dependencies=TRUE)
+}
+devtools::install_github("bbolker/broom.mixed")
+## get INLA (optional!)
+source("http://www.math.ntnu.no/inla/givemeINLA.R")
+```
+
+There is no need to (re)install packages such as `grid`, `nlme`, `MASS`, `mgcv`, as they come with a standard R installation. 
+
+Last updated: `r Sys.time()`
