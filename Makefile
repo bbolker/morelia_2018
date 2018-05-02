@@ -1,10 +1,8 @@
-%.html: %.rmd
-	echo "rmarkdown::render(\"$<\",output_format='html_document')" | R --slave
+%.rtf: ../%.rmd
+	echo "rmarkdown::render(\"$<\")" | R --slave
 
-##%.pdf: %.rmd
-##n	echo "rmarkdown::render(\"$<\",output_format='tufte_handout')" | R --slave
+notes/%.html: ../notes/%.rmd
+	echo "rmarkdown::render(\"$<\",output_format='html_document',output_dir='notes')" | R --slave
 
-notes = $(wildcard notes/*.rmd)
-notepages = $(notes:%.rmd=gh-pages/%.html)
-
-pushnotes: $(notepages)
+notes/%.pdf: ../notes/%.rmd
+	echo "rmarkdown::render(\"$<\",output_format='tufte_handout',output_dir='notes')" | R --slave
