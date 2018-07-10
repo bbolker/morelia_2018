@@ -17,7 +17,7 @@ The student can:
 
 - effectively create exploratory, diagnostic, and expository graphs from data
 - choose and execute an appropriate statistical analysis for a given set of data and scientific questions
-- execute, trouble-shoot, and interpret the results of generalized, linear mixed, and generalized linear mixed models.
+- execute, trouble-shoot, and interpret the results of linear and generalized linear mixed models.
 
 * Social competence and attitude
 
@@ -41,32 +41,29 @@ Theoretical knowledge and practical skills in applying statistical methods at th
 	* intro to quantitative display: graphical hierarchies
 	* ggplot basics
 	* intermediate ggplot: smooths and facets
-* introduction/review of generalized linear models [@McCullaghNelder1989,@faraway_extending_2006,@dobson_introduction_2008,@hardin_generalized_2007]
-	* links and families
-	* estimation basics
-	* parameterizing linear models: scales and contrasts
-	* model diagnostics
-	* testing hypotheses and interpreting results
-* GLMs for count data
-    * Poisson models
-    * log link function: interpretation and back-transformation
-	* diagnosing overdispersion
-	* solutions for overdispersion: quasi-likelihood, negative binomial
-	* offsets
-* GLMs for binomial and binary data
-    * binomial models
-    * overdispersion in binomial models
-    * challenges of binary data
-	     * goodness-of-fit, diagnostics
-	     * complete separation
-    * offsets for survival models		 
+* mixed/hierarchical/multilevel models: introduction [@gelman_data_2006,@zuur_mixed_2009]
+    * conceptual basis, frequentist and Bayesian
+    * definition of random effects
+	* shrinkage and pooling
+	* experimental designs: nesting and crossing
+* linear mixed models
+    * frequentist estimation
+    * model diagnostics and checking
+	* inference
+* generalized linear mixed models
+    * frequentist estimation
+    * model diagnostics and checking
+	* inference
+* introduction to Bayesian statistics
+    * basic Bayes
+    * modern computational Bayes: MCMC
+* Bayesian estimation/diagnostics/inference for (G)LMMs
+	
+## Additional topics (as time/interest allows)
+
+* time-series and spatial models
 * zero-inflated models
-* alternative families and links
-* mixed models [@gelman_data_2006,@zuur_mixed_2009]
-	* mixed model basics
-	* graphics
-	* frequentist estimation (`lme4` and `glmmTMB`)
-	* Bayesian estimation (`MCMCglmm` and `brms`)
+* GLMs: alternative families and links
 
 ## Bibliography
 
