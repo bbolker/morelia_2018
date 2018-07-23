@@ -90,6 +90,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -122,25 +125,27 @@ $(document).ready(function () {
 </div>
 
 
-<p>Please make sure you have the <strong>latest version</strong> of R (3.5.0) installed from <a href="https://cran.r-project.org/">CRAN</a>.</p>
+<p>Please make sure you have the <strong>latest version</strong> of R (3.5.1) installed from <a href="https://cran.r-project.org/">CRAN</a>.</p>
 <p>The RStudio interface is strongly recommended; you can download it <a href="https://www.rstudio.com/products/rstudio/download/">here</a> (get the free Desktop version).</p>
+<p>Note that this list deliberately takes an <a href="https://en.wiktionary.org/wiki/everything_but_the_kitchen_sink#English">everything-but-the-kitchen-sink</a> approach, since it will save time to have everything you might want installed in advance. If you have questions or problems, please contact me before the workshop.</p>
 <p>Install primary GLMM-fitting packages (and a variety of extras):</p>
 <pre class="r"><code>## modeling packages
-mod_pkgs &lt;- c(&quot;bbmle&quot;,&quot;blme&quot;,&quot;brms&quot;,&quot;gamm4&quot;,&quot;glmmLasso&quot;,&quot;glmmML&quot;,
-              &quot;lme4&quot;,&quot;glmmTMB&quot;,&quot;MCMCglmm&quot;,&quot;robustlmm&quot;,
-              &quot;spaMM&quot;)
+mod_pkgs &lt;- c(&quot;bbmle&quot;, &quot;blme&quot;, &quot;brms&quot;, &quot;gamm4&quot;, &quot;glmmLasso&quot;, &quot;glmmML&quot;,
+              &quot;glmmTMB&quot;, &quot;lme4&quot;, &quot;MCMCglmm&quot;, &quot;robustlmm&quot;, &quot;spaMM&quot;)
 ## miscellaneous/data manipulation
-data_pkgs &lt;- c(&quot;tidyverse&quot;,&quot;reshape2&quot;,&quot;plyr&quot;, &quot;benchmark&quot;,
-               &quot;emdbook&quot;,&quot;SASmixed&quot;,&quot;devtools&quot;, &quot;brglm&quot;)
+data_pkgs &lt;- c(&quot;benchmark&quot;, &quot;brglm&quot;, &quot;devtools&quot;, &quot;emdbook&quot;, &quot;MEMSS&quot;,
+               &quot;plyr&quot;, &quot;reshape2&quot;, &quot;SASmixed&quot;, &quot;tidyverse&quot;)
 ## model processing/diagnostics/reporting
-diag_pkgs &lt;- c(&quot;afex&quot;,&quot;agridat&quot;, &quot;AICcmodavg&quot;, &quot;aods3&quot;, &quot;cAIC4&quot;, &quot;coda&quot;,
-               &quot;DHARMa&quot;, &quot;effects&quot;, &quot;emmeans&quot;, &quot;multcomp&quot;, &quot;arm&quot;, &quot;car&quot;,
-               &quot;Hmisc&quot;,&quot;HLMdiag&quot;,&quot;stargazer&quot;,&quot;texreg&quot;,&quot;rockchalk&quot;,
-               &quot;RLRsim&quot;,&quot;pbkrtest&quot;,&quot;lmerTest&quot;,&quot;broom&quot;)
+diag_pkgs &lt;- c(&quot;afex&quot;, &quot;agridat&quot;, &quot;AICcmodavg&quot;, &quot;aods3&quot;, &quot;arm&quot;,
+               &quot;broom&quot;, &quot;cAIC4&quot;, &quot;car&quot;, &quot;coda&quot;, &quot;DHARMa&quot;, &quot;effects&quot;,
+               &quot;emmeans&quot;, &quot;HLMdiag&quot;, &quot;Hmisc&quot;, &quot;lmerTest&quot;, &quot;multcomp&quot;,
+               &quot;MuMIn&quot;, &quot;pbkrtest&quot;, &quot;RLRsim&quot;, &quot;rockchalk&quot;, &quot;sjPlot&quot;,
+               &quot;sjstats&quot;, &quot;stargazer&quot;, &quot;texreg&quot;, &quot;tidybayes&quot;)
 ## graphics
-graph_pkgs &lt;- c(&quot;dotwhisker&quot;,&quot;ggplot2&quot;,&quot;ggstance&quot;,&quot;GGally&quot;,&quot;cowplot&quot;,
-                &quot;gridExtra&quot;,&quot;plotrix&quot;,&quot;dotwhisker&quot;,&quot;plotMCMC&quot;,
-                &quot;ggpubr&quot;,&quot;ggalt&quot;)
+graph_pkgs &lt;- c(&quot;cowplot&quot;, &quot;dotwhisker&quot;, &quot;GGally&quot;, &quot;ggalt&quot;, &quot;ggplot2&quot;,
+                &quot;ggpubr&quot;, &quot;ggstance&quot;, &quot;gridExtra&quot;, &quot;plotMCMC&quot;,
+                &quot;plotrix&quot;, &quot;viridis&quot;)
+
 all_pkgs &lt;- c(mod_pkgs,data_pkgs,diag_pkgs,graph_pkgs)
 avail_pkgs &lt;- rownames(available.packages())
 already_installed &lt;- rownames(installed.packages())
@@ -152,7 +157,7 @@ devtools::install_github(&quot;bbolker/broom.mixed&quot;)
 ## get INLA (optional!)
 source(&quot;http://www.math.ntnu.no/inla/givemeINLA.R&quot;)</code></pre>
 <p>There is no need to (re)install packages such as <code>grid</code>, <code>nlme</code>, <code>MASS</code>, <code>mgcv</code>, as they come with a standard R installation.</p>
-<p>Last updated: 2018-05-02 11:30:53</p>
+<p>Last updated: 2018-07-23 15:27:01</p>
 
 
 
