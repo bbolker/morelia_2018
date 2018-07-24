@@ -1,4 +1,5 @@
-SRCDIR=../
+SRCDIR=..
+all: notes/modeling_inference.html notes/glmm.html notes/datavis.html
 
 %.html: ${SRCDIR}/%.[Rr]md
 	echo "rmarkdown::render(\"$<\",output_dir='.')" | R --slave
