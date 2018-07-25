@@ -37,27 +37,31 @@ Theoretical knowledge and practical skills in applying statistical methods at th
 
 ## Full description (=content of the course):
 
-* exploratory graphics using `ggplot` [@wickham2009,@cleveland_visualizing_1993]
-	* intro to quantitative display: graphical hierarchies
-	* ggplot basics
-	* intermediate ggplot: smooths and facets
-* mixed/hierarchical/multilevel models: introduction [@gelman_data_2006,@zuur_mixed_2009]
-    * conceptual basis, frequentist and Bayesian
-    * definition of random effects
-	* shrinkage and pooling
-	* experimental designs: nesting and crossing
-* linear mixed models
-    * frequentist estimation
-    * model diagnostics and checking
-	* inference
-* generalized linear mixed models
-    * frequentist estimation
-    * model diagnostics and checking
-	* inference
-* introduction to Bayesian statistics
-    * basic Bayes
-    * modern computational Bayes: MCMC
-* Bayesian estimation/diagnostics/inference for (G)LMMs
+* **Monday**
+    * exploratory graphics using `ggplot` [@wickham2009,@cleveland_visualizing_1993]
+	    * intro to quantitative display: graphical hierarchies
+	    * ggplot basics
+	    * intermediate ggplot: smooths and facets
+    * mixed/hierarchical/multilevel models: introduction [@gelman_data_2006,@zuur_mixed_2009]
+        * conceptual basis, frequentist and Bayesian
+        * definition of random effects
+     	* shrinkage and pooling
+	    * experimental designs: nesting and crossing
+    *  
+* **Tuesday**
+    * linear mixed models
+         * frequentist estimation
+         * model diagnostics and checking
+         * inference
+    * generalized linear mixed models
+         * frequentist estimation
+         * model diagnostics and checking
+	     * inference
+* **Wednesday**		 
+    * introduction to Bayesian statistics
+         * basic Bayes
+         * modern computational Bayes: MCMC
+    * Bayesian estimation/diagnostics/inference for (G)LMMs
 	
 ## Additional topics (as time/interest allows)
 

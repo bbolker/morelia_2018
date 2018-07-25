@@ -2,29 +2,32 @@
 title: "Setup for GLMM course"
 ---
 
-Please make sure you have the **latest version** of R (3.5.0) installed from [CRAN](https://cran.r-project.org/).
+Please make sure you have the **latest version** of R (3.5.1) installed from [CRAN](https://cran.r-project.org/).
 
 The RStudio interface is strongly recommended; you can download it [here](https://www.rstudio.com/products/rstudio/download/) (get the free Desktop version).
+
+Note that this list deliberately takes an [everything-but-the-kitchen-sink](https://en.wiktionary.org/wiki/everything_but_the_kitchen_sink#English) approach, since it will save time to have everything you might want installed in advance. If you have questions or problems, please contact me before the workshop.
 
 Install primary GLMM-fitting packages (and a variety of extras):
 
 ```{r pkg1,eval=FALSE}
 ## modeling packages
-mod_pkgs <- c("bbmle","blme","brms","gamm4","glmmLasso","glmmML",
-              "lme4","glmmTMB","MCMCglmm","robustlmm",
-              "spaMM")
+mod_pkgs <- c("bbmle", "blme", "brms", "gamm4", "glmmLasso", "glmmML",
+              "glmmTMB", "lme4", "MCMCglmm", "robustlmm", "spaMM")
 ## miscellaneous/data manipulation
-data_pkgs <- c("tidyverse","reshape2","plyr", "benchmark",
-               "emdbook","SASmixed","devtools", "brglm")
+data_pkgs <- c("benchmark", "brglm", "devtools", "emdbook", "MEMSS",
+               "plyr", "reshape2", "SASmixed", "tidyverse")
 ## model processing/diagnostics/reporting
-diag_pkgs <- c("afex","agridat", "AICcmodavg", "aods3", "cAIC4", "coda",
-               "DHARMa", "effects", "emmeans", "multcomp", "arm", "car",
-               "Hmisc","HLMdiag","stargazer","texreg","rockchalk",
-               "RLRsim","pbkrtest","lmerTest","broom")
+diag_pkgs <- c("afex", "agridat", "AICcmodavg", "aods3", "arm",
+               "broom", "cAIC4", "car", "coda", "DHARMa", "effects",
+               "emmeans", "HLMdiag", "Hmisc", "lmerTest", "multcomp",
+               "MuMIn", "pbkrtest", "RLRsim", "rockchalk", "sjPlot",
+               "sjstats", "stargazer", "texreg", "tidybayes")
 ## graphics
-graph_pkgs <- c("dotwhisker","ggplot2","ggstance","GGally","cowplot",
-                "gridExtra","plotrix","dotwhisker","plotMCMC",
-                "ggpubr","ggalt")
+graph_pkgs <- c("cowplot", "dotwhisker", "GGally", "ggalt", "ggplot2",
+                "ggpubr", "ggstance", "gridExtra", "plotMCMC",
+                "plotrix", "viridis")
+
 all_pkgs <- c(mod_pkgs,data_pkgs,diag_pkgs,graph_pkgs)
 avail_pkgs <- rownames(available.packages())
 already_installed <- rownames(installed.packages())
