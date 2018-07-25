@@ -125,13 +125,14 @@ $(document).ready(function () {
 </div>
 
 
-<p>Please make sure you have the <strong>latest version</strong> of R (3.5.1) installed from <a href="https://cran.r-project.org/">CRAN</a>.</p>
-<p>The RStudio interface is strongly recommended; you can download it <a href="https://www.rstudio.com/products/rstudio/download/">here</a> (get the free Desktop version).</p>
-<p>Note that this list deliberately takes an <a href="https://en.wiktionary.org/wiki/everything_but_the_kitchen_sink#English">everything-but-the-kitchen-sink</a> approach, since it will save time to have everything you might want installed in advance. If you have questions or problems, please contact me before the workshop.</p>
-<p>Install primary GLMM-fitting packages (and a variety of extras):</p>
+<ol style="list-style-type: decimal">
+<li><p>Please make sure you have the <strong>latest version</strong> of R (3.5.1) installed from <a href="https://cran.r-project.org/">CRAN</a>.</p></li>
+<li><p>The RStudio interface is strongly recommended; you can download it <a href="https://www.rstudio.com/products/rstudio/download/">here</a> (get the free Desktop version).</p></li>
+<li><p>Install primary GLMM-fitting packages (and a variety of extras). Note that this list deliberately takes an <a href="https://en.wiktionary.org/wiki/everything_but_the_kitchen_sink#English">everything-but-the-kitchen-sink</a> approach, since it will save time to have everything you might want installed in advance. If you have questions or problems, please contact me before the workshop.</p></li>
+</ol>
 <pre class="r"><code>## modeling packages
 mod_pkgs &lt;- c(&quot;bbmle&quot;, &quot;blme&quot;, &quot;brms&quot;, &quot;gamm4&quot;, &quot;glmmLasso&quot;, &quot;glmmML&quot;,
-              &quot;glmmTMB&quot;, &quot;lme4&quot;, &quot;MCMCglmm&quot;, &quot;robustlmm&quot;, &quot;spaMM&quot;)
+              &quot;glmmTMB&quot;, &quot;lme4&quot;, &quot;MCMCglmm&quot;, &quot;robustlmm&quot;, &quot;rstanarm&quot;, &quot;spaMM&quot;)
 ## miscellaneous/data manipulation
 data_pkgs &lt;- c(&quot;benchmark&quot;, &quot;brglm&quot;, &quot;devtools&quot;, &quot;emdbook&quot;, &quot;MEMSS&quot;,
                &quot;plyr&quot;, &quot;reshape2&quot;, &quot;SASmixed&quot;, &quot;tidyverse&quot;)
@@ -157,7 +158,22 @@ devtools::install_github(&quot;bbolker/broom.mixed&quot;)
 ## get INLA (optional!)
 source(&quot;http://www.math.ntnu.no/inla/givemeINLA.R&quot;)</code></pre>
 <p>There is no need to (re)install packages such as <code>grid</code>, <code>nlme</code>, <code>MASS</code>, <code>mgcv</code>, as they come with a standard R installation.</p>
-<p>Last updated: 2018-07-23 15:27:01</p>
+<ol start="4" style="list-style-type: decimal">
+<li>If we end up using the <code>brms</code> package for Bayesian computation, we will need compilers installed as well:</li>
+</ol>
+<blockquote>
+<p>Because brms is based on Stan, a C++ compiler is required. The program Rtools (available on <a href="https://cran.r-project.org/bin/windows/Rtools/" class="uri">https://cran.r-project.org/bin/windows/Rtools/</a>) comes with a C++ compiler for Windows. On Mac, you should install Xcode. For further instructions on how to get the compilers running, see the prerequisites section on <a href="https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started" class="uri">https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started</a>.</p>
+</blockquote>
+<ul>
+<li>Windows: download Rtools from <a href="https://cran.r-project.org/bin/windows/Rtools/">here</a></li>
+<li>MacOS: install Xcode; on recent versions of MacOS you need to open a Terminal, type <code>xcode-select --install</code> and then click “Install” and “Agree”. (If you have an older version or want more details see <a href="https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/">here</a>; you only need to do “Step 1” of these instructions.)</li>
+<li>Linux: make sure you have gcc/g++ installed</li>
+</ul>
+<ol start="5" style="list-style-type: decimal">
+<li>Install</li>
+</ol>
+<hr />
+<p>Last updated: 2018-07-24 22:11:54</p>
 
 
 
