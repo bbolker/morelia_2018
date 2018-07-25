@@ -1,6 +1,5 @@
 ---
 title: "Course title: Generalized and linear mixed models for biologists"
-output: rtf_document
 csl: apa.csl
 bibliography: [glmm.bib]
 header-includes:

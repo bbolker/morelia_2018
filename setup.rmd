@@ -2,18 +2,17 @@
 title: "Setup for GLMM course"
 ---
 
-Please make sure you have the **latest version** of R (3.5.1) installed from [CRAN](https://cran.r-project.org/).
+1. Please make sure you have the **latest version** of R (3.5.1) installed from [CRAN](https://cran.r-project.org/).
 
-The RStudio interface is strongly recommended; you can download it [here](https://www.rstudio.com/products/rstudio/download/) (get the free Desktop version).
+2. The RStudio interface is strongly recommended; you can download it [here](https://www.rstudio.com/products/rstudio/download/) (get the free Desktop version).
 
+3. Install primary GLMM-fitting packages (and a variety of extras).
 Note that this list deliberately takes an [everything-but-the-kitchen-sink](https://en.wiktionary.org/wiki/everything_but_the_kitchen_sink#English) approach, since it will save time to have everything you might want installed in advance. If you have questions or problems, please contact me before the workshop.
-
-Install primary GLMM-fitting packages (and a variety of extras):
 
 ```{r pkg1,eval=FALSE}
 ## modeling packages
 mod_pkgs <- c("bbmle", "blme", "brms", "gamm4", "glmmLasso", "glmmML",
-              "glmmTMB", "lme4", "MCMCglmm", "robustlmm", "spaMM")
+              "glmmTMB", "lme4", "MCMCglmm", "robustlmm", "rstanarm", "spaMM")
 ## miscellaneous/data manipulation
 data_pkgs <- c("benchmark", "brglm", "devtools", "emdbook", "MEMSS",
                "plyr", "reshape2", "SASmixed", "tidyverse")
@@ -42,4 +41,15 @@ source("http://www.math.ntnu.no/inla/givemeINLA.R")
 
 There is no need to (re)install packages such as `grid`, `nlme`, `MASS`, `mgcv`, as they come with a standard R installation. 
 
+4. If we end up using the `brms` package for Bayesian computation, we will need compilers installed as well: 
+
+> Because brms is based on Stan, a C++ compiler is required. The program Rtools (available on https://cran.r-project.org/bin/windows/Rtools/) comes with a C++ compiler for Windows. On Mac, you should install Xcode. For further instructions on how to get the compilers running, see the prerequisites section on https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started.
+
+- Windows: download Rtools from [here](https://cran.r-project.org/bin/windows/Rtools/)
+- MacOS: install Xcode; on recent versions of MacOS you need to open a Terminal, type `xcode-select --install` and then click "Install" and "Agree". (If you have an older version or want more details see [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/); you only need to do "Step 1" of these instructions.)
+- Linux: make sure you have gcc/g++ installed
+
+5. Install 
+
+---
 Last updated: `r Sys.time()`

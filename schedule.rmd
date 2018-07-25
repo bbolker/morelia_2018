@@ -1,0 +1,34 @@
+---
+title: "Morelia GLMM workshop schedule"
+date: "`r format(Sys.time(),'%d %b %Y')`"
+---
+
+**subject to change!**
+
+## Monday: graphics, GLMM overview, inference/philosophy
+
+- intro/overview: 30 min
+- ggplot/graphics intro: 1 hour
+- break: 15 mins
+- ggplot ex/lab: 1 hour (45 mins?)
+- break: 15 mins
+- mixed models overview: 1.5 hours
+- inference/philosophy overview?
+
+## Tuesday: GLMM basics
+
+- generalized linear mixed models: practical details, workflow (1.5 hours)
+- break: 15 minutes
+- mixed models: lab (1.5 hours)
+- mixed models: troubleshooting (1 hour)
+
+## Wednesday: Bayesian/advanced GLMMs
+
+- basic Bayes: 1 hour
+- break: 15 mins
+- Bayesian mixed models: 1.5 hour
+- break: 15 mins
+- lab: 1 hour
+- wrap-up: 1 hour
+
+
