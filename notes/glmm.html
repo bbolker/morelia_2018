@@ -316,22 +316,6 @@ approximation for GLM(M)s</li>
 <div id="culcita-confidence-intervals" class="section level2">
 <h2><em>Culcita</em> confidence intervals</h2>
 </div>
-<div id="formula-formats" class="section level2">
-<h2>formula formats</h2>
-<ul>
-<li><code>fixed</code>: fixed-effect formula</li>
-<li><code>random</code>: random-effect formula (in <code>lme4</code>, combined with fixed)
-<ul>
-<li>generally <code>x|g</code> (term|grouping variable)</li>
-<li>simplest: <code>1|g</code>, single intercept term</li>
-<li>nested: <code>1|g1/g2</code></li>
-<li>random-slopes: <code>r|g</code></li>
-<li>independent terms: <code>(1|g)+(x+0|g)</code> or <code>(x||g)</code></li>
-</ul></li>
-<li><code>lme</code>: <code>weights</code>, <code>correlation</code> for heteroscedasticity and residual correlation</li>
-<li><code>MCMCglmm</code>: options for variance structure</li>
-</ul>
-</div>
 </div>
 <div id="challenges-open-questions" class="section level1">
 <h1>Challenges &amp; open questions</h1>

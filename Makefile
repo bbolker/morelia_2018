@@ -1,6 +1,6 @@
 SRCDIR=..
 
-notes += modeling_inference glmm datavis
+notes += modeling_inference glmm datavis bayes bayeslab mixed_details mixedlab
 
 nnhtml := $(notes:%=notes/%.html)
 nnrmd := $(notes:%=notes/%.rmd)
