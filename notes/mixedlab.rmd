@@ -26,31 +26,24 @@ Licensed under the
 [Creative Commons attribution-noncommercial license](http://creativecommons.org/licenses/by-nc-sa/2.5/ca/).
 Please share \& remix noncommercially, mentioning its origin.
 
-Packages/versions used:
-```{r pkglist,echo=FALSE}
-usedpkgs <- sort(c("lme4","nlme","glmmADMB","R2jags",
-                   "MCMCglmm","pbkrtest","coda","reshape2","plyr"))
-i1 <- installed.packages()
-print(i1[usedpkgs,"Version"],quote=FALSE)
-```
-
 Load packages:
 ```{r pkgs}
 ## modeling packages
 library("lme4")     ## basic (G)LMMs
-library("MCMCglmm") ## Bayesian GLMMs
 library("nlme")     ## more LMMs
 library("afex")     ## helper functions
+library("emmeans")
 
 ## graphics
 library("ggplot2"); theme_set(theme_bw())
 ## squash panels together
-zero_margin <- theme(panel.margin=grid::unit(0,"lines")) 
+zero_margin <- theme(panel.spacing=grid::unit(0,"lines")) 
 library("lattice")
 library("dotwhisker")  ## coefficient plots
 
 ## data manipulation
 library("broom")
+library("broom.mixed")
 library("reshape2")
 library("plyr")
 ```
@@ -65,7 +58,7 @@ Data from Toby Marthews, [r-sig-mixed-models mailing list](http://tolstoy.newcas
 
 ```{r starling1,fig.height=4,fig.width=7}
 ## cosmetic tweaks
-load("data/starling.RData")   ## loads "dataf"
+load("../data/starling.RData")   ## loads "dataf"
 ggplot(dataf,aes(x=mnth,y=stmass))+
   geom_point()+
   geom_line(aes(group=subject))+  ## connect subjects with a line
@@ -79,19 +72,21 @@ ggplot(dataf,aes(mnth,stmass,colour=roostsitu))+
     geom_point()+
     geom_line(aes(group=subject))
 ```
-for comparison, but I prefer the former plot.
+for comparison: what are the tradeoffs?
 
 Overkill for this data set, but sometimes it can be useful to put every individual in its own facet:
 
 ```{r altplot2,fig.keep="none"}
-## reorder individuals by difference
+## reorder individuals by magnitude of difference
 dataf <- transform(dataf,subject=reorder(subject,stmass,FUN=diff))
 ggplot(dataf,aes(mnth,stmass,colour=roostsitu,group=subject))+
-  geom_point()+geom_line()+facet_wrap(~subject)+
+    geom_point()+geom_line()+facet_wrap(~subject)+
     zero_margin
 ```
 
-It's pretty obvious that the starting (November) mass varies among roost situations (tree/nest-box/etc.), and that mass increases from November to January, but we might like to know if the slopes differ among situations. That means our fixed effects would be `~roostsitu*mnth`, with our attention focused on the `roostsitu:mnth` (interaction) term.  For random effects, we can allow both intercept (obviously) and slope (maybe) to vary among individuals, via `(1+mnth|subject)` or equivalent ... in this case, because measurements are only taken in two months, we can also write the random term as `(1|subject/mnth)`.  **However**, it turns out that we can't actually estimate random slopes for this model, because every individual is only measured twice. That means that the variance in the slopes would be completely confounded with the residual variance.
+It's pretty obvious that the starting (November) mass varies among roost situations (tree/nest-box/etc.), and that mass increases from November to January, but we might like to know if the slopes differ among situations. That means our fixed effects would be `~roostsitu*mnth`, with our attention focused on the `roostsitu:mnth` (interaction) term.  For random effects, we can allow both intercept (obviously) and slope (maybe) to vary among individuals, via `(1+mnth|subject)` or equivalent ... in this case, because measurements are only taken in two months, we can also write the random term as `(1|subject/mnth)`.
+
+**However**, it turns out that we can't actually estimate random slopes for this model, because every individual is only measured twice. That means that the variance in the slopes would be completely confounded with the residual variance.
 
 If we fit this with lme4
 ```{r lmerfit1,error=TRUE}
@@ -183,7 +178,7 @@ qqmath(lmer2,col=dataf$roostsitu,pch=dataf$mnth)
 ```
 
 We can also do this with `tidy::augment()` and `stat_qq()` (although there are also some some limitations - `colour` argument doesn't actually work...)
-```{r ggqq,fig.keep="none"}
+```{r ggqq,fig.keep="none",cache=TRUE}
 ggplot(augment(lmer2),
        aes(sample=.resid/sd(.resid)))+  ## scale to variance=1
         stat_qq(aes(group=1,colour=roostsitu))+
@@ -228,7 +223,7 @@ One good way to assess the results of a model fit is to look at a coefficient pl
 dwplot(lmer2)+geom_vline(xintercept=0,lty=2)
 ```
 
-(It's usually a good idea to drop the intercept from coefficient plots: the next release of `dwplot` will have a `drop_intercept` parameter that will do this automatically.) For more complicated coefficient plots, you can use the combination of the `broom` package to get the parameters in a useful form and `dwplot` to draw the plot.
+(Note that the intercept is automatically dropped; this is usually the right choice. Use `show_intercept=TRUE` to have the intercept included.) For more complicated coefficient plots, you can use the combination of the `broom.mixed` package to get the parameters in a useful form and `dwplot` to draw the plot.
 
 Stop and explain to yourself what these parameters mean.  If you're not sure, try resetting the base level of the `roostsitu` factor: `dataf2 <- transform(dataf,roostsitu=relevel(roostsitu,ref="other"))`, predict what will happen to the results, and re-run the analysis.)
 
@@ -334,7 +329,7 @@ anova(lme2,type="marginal")
 **be careful when doing "marginal"/"type 3" tests in the presence of interactions!**
 Also note that `nlme::lme` gets denominator df calculations wrong for some random-slopes models. If you want to try `lme`'s denominator df calculations without actually fitting the model:
 ```{r calcdendf,}
-source("R/calcDenDF.R")
+source("../R/calcDenDF.R")
 calcDenDF(~roostsitu*mnth,"subject",dataf)
 ```
 
@@ -373,7 +368,9 @@ roost site)= 36 df.
 
 If you wanted to compute the $p$-values by hand, you could:
 ```{r pvalues}
-a2 <- anova(lmer2B)
+## here we use lme4:::anova.merMod to force R to use the anova
+## method from lme4 rather than the one from lmerTest
+a2 <- lme4:::anova.merMod(lmer2B)
 fvals <- a2[,"F value"]
 numdf <- a2[,"Df"]
 dendf <- 36
@@ -441,73 +438,9 @@ ggplot(dataf,aes(mnth,pred1))+
 
 For most cases you will want to set up a new data frame to do prediction rather than just using the covariates from the original data (e.g. if the data are sampled irregularly, or sparsely), and use the `newdata` argument of `predict`.  The `expand.grid` function is handy in this context too.
 
-### analyze with `MCMCglmm`
-
-```{r mcmcsum}
-summary(mcmcglmm1)
-```
-
-MCMCglmm makes it a little bit easier to get confidence intervals on the predictions.  The `marginal` argument specifies which random effects we want the predictions to "marginalise" (i.e., average over). The default is to use all of the random effects in the original model (i.e. `~subject` in this case), i.e. to predict the average population-level outcome.  The approach taken below to get the subject-level predictions (i.e. marginalise over nothing, since `subject` is the only random effect) is a bit of a hack: this may be easier in future versions.
-
-
-In order to get all the predictions we want, 
-we need to refit the model using `pr=TRUE` to store the random effects (which are sometimes quite large, hence not stored by default):
-
-```{r mcmcglmm1R}
-mcmcglmm1R <- MCMCglmm(stmass~mnth*roostsitu,
-         random=~subject,data=dataf,
-         verbose=FALSE,pr=TRUE)
-```
-
-
-```{r mcmcpred,warning=FALSE}
-mpred0 <- predict(mcmcglmm1R,interval="confidence")
-colnames(mpred0) <- paste("mpred0",c("fit","lwr","upr"),sep=".")
-mpred1 <- predict(mcmcglmm1R,interval="confidence",
-                           marginal=NULL)
-colnames(mpred1) <- paste("mpred1",c("fit","lwr","upr"),sep=".")
-dataf <- data.frame(dataf,mpred0,mpred1)
-```
-
-Testing that we get the same results for the level-1 predictions:
-```{r checkpred}
-ggplot(dataf,aes(x=pred1,y=mpred1.fit))+geom_point()+
-  geom_abline(slope=1,intercept=0)+
-  labs(x="lmer prediction",y="MCMCglmm prediction")
-```
-
-Now we can plot confidence intervals
-```{r mcconf}
-g0 <- ggplot(dataf,aes(x=mnth,y=stmass))+
-  stat_sum(aes(size=factor(..n..)),alpha=0.5)+
-  facet_grid(~roostsitu)+
-  scale_size_discrete(name="n",range=c(2,5))+
-  zero_margin
-g0 + geom_line(aes(x=as.numeric(mnth),y=mpred0.fit),colour="red")+
-  geom_ribbon(aes(x=as.numeric(mnth),y=mpred0.fit,
-                  ymin=mpred0.lwr,ymax=mpred0.upr),fill="red",
-              alpha=0.3)
-```
-
-We can plot individual predictions and confidence intervals as well, although in this case the plot is almost identical:
-
-```{r mcconf2}
-g0 + geom_line(aes(x=as.numeric(mnth),y=mpred1.fit,group=subject),
-               colour="blue")+
-   geom_ribbon(aes(x=as.numeric(mnth),y=mpred1.fit,group=subject,
-                  ymin=mpred1.lwr,ymax=mpred1.upr),fill="blue",
-              alpha=0.05)
-```
-
-### GLMM stuff
-
-- specify `family` ...
-- alternative link functions ...
-- handling overdispersion
-
 ### History
 
 * originally developed for NCEAS summer institute, July 2013
 * updated, Alaska ASA workshop, August 2014
 * updated, Ottawa workshop, Jan 2016 (removed JAGS material)
-* updated, Morelia workshop
+* updated, Morelia workshop (moved MCMCglmm to standalone)

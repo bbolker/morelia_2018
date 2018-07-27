@@ -21,7 +21,7 @@ diag_pkgs <- c("afex", "agridat", "AICcmodavg", "aods3", "arm",
                "broom", "cAIC4", "car", "coda", "DHARMa", "effects",
                "emmeans", "HLMdiag", "Hmisc", "lmerTest", "multcomp",
                "MuMIn", "pbkrtest", "RLRsim", "rockchalk", "sjPlot",
-               "sjstats", "stargazer", "texreg", "tidybayes")
+               "sjstats", "stargazer", "texreg")
 ## graphics
 graph_pkgs <- c("cowplot", "dotwhisker", "GGally", "ggalt", "ggplot2",
                 "ggpubr", "ggstance", "gridExtra", "plotMCMC",
@@ -35,6 +35,7 @@ if (length(to_install)>0) {
     install.packages(to_install,dependencies=TRUE)
 }
 devtools::install_github("bbolker/broom.mixed")
+devtools::install_github("mjskay/tidybayes")
 ## get INLA (optional!)
 source("http://www.math.ntnu.no/inla/givemeINLA.R")
 ```

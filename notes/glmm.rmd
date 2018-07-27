@@ -483,18 +483,6 @@ approximation for GLM(M)s
 
 ## *Culcita* confidence intervals
 
-## formula formats
-
--   `fixed`: fixed-effect formula
--   `random`: random-effect formula (in `lme4`, combined with fixed)
-    -   generally `x|g` (term|grouping variable)
-    -   simplest: `1|g`, single intercept term
-    -   nested: `1|g1/g2`
-    -   random-slopes: `r|g`
-    -   independent terms: `(1|g)+(x+0|g)` or `(x||g)`
--   `lme`: `weights`, `correlation` for heteroscedasticity and residual correlation
--   `MCMCglmm`: options for variance structure
-
 # Challenges & open questions
 
 ## On beyond `lme4`

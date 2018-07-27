@@ -1,0 +1,109 @@
+---
+title: "Linear mixed models in R: nitty-gritty"
+author: Ben Bolker
+bibliography: "../glmm.bib"
+date: "`r format(Sys.time(), '%d %B %Y ')`"
+---
+
+# Model specification
+
+## Distribution/family
+
+- going to assume Gaussian (Normal) here
+- may need to transform
+- remember we want **conditional** distribution to be Normal, not marginal
+- Box-Cox not implemented: could try `MASS::boxcox()` on residuals
+- brute-force: if it makes sense or *if* residuals look bad, try log/sqrt?
+
+## Random effects: reminder
+
+(from @bolker_glmm_2014) Use random effects if you
+
+- don’t want to test hypotheses about differences between responses at particular levels of
+the grouping variable;
+- do want to quantify the variability among levels of the grouping variable;
+- do want to make predictions about unobserved levels of the grouping variable;
+- do want to combine information across levels of the grouping variable;
+- have variation in information per level (number of samples or noisiness);
+- have levels that are randomly sampled from/representative of a larger population;
+- have a categorical predictor that is a nuisance variable (i.e., it is not of direct interest, but should be controlled for).
+
+See also @Crawley2002; @gelman_analysis_2005
+
+If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.
+
+## Formulas
+
+- random effects specified as `(a|g1) + (b|g2) + ...`
+- terms separated by `+` are independent
+- right-hand side is the *grouping variable* (always categorical, usually a factor)
+- left-hand side is the *varying term* (most often 1)
+http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1 (Livius)
+
+| $β_0 + β_{1}X_{i} + e_{si}$ | n/a (Not a mixed-effects model) |
+| $β_0 + S_{0s} + β_{1}X_{i} + e_{si} $  | `∼ X+(1∣Subject)`  |
+| $β_0 + S_{0s} +  (β_{1} + S_{1s})Xi + e_{si}$ | `~ X+(1 + X∣Subject)`
+| $β_0 + S_{0s} + I_{0i} +  (β_{1} + S_{1s})Xi + e_{si}$ | `∼ X+(1 + X∣Subject)+(1∣Item)`
+| $ β_0 + S_{0s} + I_{0i} + β_{1}X_{i} + e_{si}$  | `∼ X+(1∣Subject)+(1∣Item)` | 
+| As above, but $S_{0s}$, $S_{1s}$ independent | `∼ X+(1∣Subject)+(0 + X∣ Subject)+(1∣Item)` |
+| $β_0 + I_{0i} +  (β_{1} + S_{1s})Xi + e_{si}$ |  `∼ X+(0 + X∣Subject)+(1∣Item)`
+
+## Formulas, interactions, nesting etc.
+
+`a*b` = main effects plus interaction, `a:b` = interaction only, `a/b` = `a` + `a:b`
+
+- Nested: `(1|f/g)` equivalent to `(1|f) + (1|f:g)`. e.g. subplots vary within plots (but "subplot 1 of every plot" isn't meaningful)
+- Crossed: `(1|f) + (1|g)`. e.g. years vary, and plots vary independently
+- Crossed+: `(1|f) + (1|g) + (1|f:g)`. e.g. years vary, and plots vary independently, and plots also vary *within* years (for LMMs, assumes >1 observation per plot/year combination). (`(1|f*g)` should be allowed but ...)
+
+Don't need explicit nesting if your sub-groups are uniquely labeled (i.e. `A1`, `A2`, ..., `B1`, `B2`, ...)
+
+## What is the maximal model?
+
+- Which effects vary *within* which groups?
+- If effects don't vary within groups, then we *can't* estimate among-group variation in the effect
+     - convenient
+     - maybe less powerful (among-group variation is lumped into residual variation)
+- e.g. female rats exposed to different doses of radiation, multiple pups per mother, multiple measurements per pup (labeled by time). Maximal model ... ?
+
+Maximal model **often won't work**
+
+## Factors vs. continuous variables in terms
+
+## Simplified versions of models
+
+- `(1|a/b)` ([positive] compound symmetry) vs. `(a|b)`
+- `(1+x+y+z||b)`
+     - independent terms
+     - expands to `(1|b) + (0+x|b) + ...`
+	 - `lme4` version **only works properly for continuous predictors**
+	 - `afex::mixed` can do this
+	 - independent model is no longer invariant to shifts/reparameterization
+- 
+
+## What is a practical model?
+
+# Inference
+
+## Likelihood
+
+## Profiles and intervals
+
+## Wald approximation
+
+most important:
+
+- small sample sizes
+- values near boundaries
+     - changing scales may help
+
+more important for variance parameters than fixed-effect parameters
+
+## Finite-size corrections
+
+e.g. Normal vs. $t$
+
+
+## Fit model
+
+## Diagnostics
