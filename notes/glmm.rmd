@@ -2,8 +2,10 @@
 title: "generalized linear mixed models"
 author: "Ben Bolker"
 bibliography: "../glmm.bib"
+csl: ../apa.csl
 header-includes:
 - \usepackage{amsmath}
+- \usepackage{amssymbol}
 - \newcommand{\X}{\boldsymbol X}
 - \newcommand{\Z}{\boldsymbol Z}
 - \newcommand{\bbeta}{\boldsymbol \beta}
@@ -145,7 +147,6 @@ text(bb[col(p)][p>0],midb[p>0],c(0,1,2)[row(p)][p>0])
 par(op)
 ```
 
-
 ## Environmental stress: *Glycera* cell survival (D. Julian unpubl.)
 
 ```{r glycera}
@@ -262,13 +263,13 @@ plotfun(j.red2,m.acr.nofr,drop.cols=c(4,8))
 \begin{equation*}
 \begin{split}
 \underbrace{Y_i}_{\text{response}} & \sim \overbrace{\text{Distr}}^{\substack{\text{conditional} \\ \text{distribution}}}(\underbrace{g^{-1}(\eta_i)}_{\substack{\text{inverse} \\ \text{link} \\ \text{function}}},\underbrace{\phi}_{\substack{\text{scale} \\ \text{parameter}}}) \\
-\underbrace{\bEta}_{\substack{\text{linear} \\ \text{predictor}}} & 
+\underbrace{\boldsymbol \eta}_{\substack{\text{linear} \\ \text{predictor}}} & 
  = 
-\underbrace{\X \bbeta}_{\substack{\text{fixed} \\ \text{effects}}} + 
-\underbrace{\Z \bb}_{\substack{\text{random} \\ \text{effects}}}
+\underbrace{\boldsymbol X \boldsymbol \beta}_{\substack{\text{fixed} \\ \text{effects}}} + 
+\underbrace{\boldsymbol Z \boldsymbol b}_{\substack{\text{random} \\ \text{effects}}}
 \\
-\underbrace{\bb}_{\substack{\text{conditional} \\ \text{modes}}}  & 
-\sim \text{MVN}(\bzero,\underbrace{\Sigma(\btheta)}_{\substack{\text{variance-} \\ \text{covariance} \\ \text{matrix}}})
+\underbrace{\boldsymbol b}_{\substack{\text{conditional} \\ \text{modes}}}  & 
+\sim \text{MVN}(\boldsymbol 0, \underbrace{\Sigma(\boldsymbol \theta)}_{\substack{\text{variance-} \\ \text{covariance} \\ \text{matrix}}})
 \end{split}
 \end{equation*}
 
@@ -316,6 +317,11 @@ the grouping variable;
 See also @Crawley2002; @gelman_analysis_2005
 
 If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.
+
+### Avoiding MM
+
+* average: for *nested* LMMs (when variance within lower levels is not of interest) [@murtaugh_simplicity_2007] 
+* use fixed effects (or two-stage models) instead of random effects when (1) samples per block are large (shrinkage will be unimportant) or (2) number of samples is small (you will save few degrees of freedom, and variance estimates are likely to be bad anyway)
 
 Estimation
 ==========
@@ -386,6 +392,51 @@ legend("bottomright",
 par(op)
 ```
 
+## Shrinkage in a random-slopes model
+
+From Christophe Lalanne, see [here](https://stats.stackexchange.com/questions/51186/what-would-be-an-illustrative-picture-for-linear-mixed-models) and [here](https://gist.github.com/chlalanne/5074855):
+
+```{r sleepstudy_shrinkage, echo=FALSE}
+library(lme4)
+data(sleepstudy)
+
+## Fit individual regression lines for each subject
+dfrm <- coef(lmList(Reaction ~ Days | Subject, sleepstudy))
+
+## Estimate parameters of a random intercept and random intercept and slope model
+m1 <- lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
+m2 <- lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+
+## Put all estimates (intercept + slope for each model) into the same data.frame
+dfrm <- cbind.data.frame(dfrm,
+                         as.data.frame(coef(m1)[["Subject"]]),
+                         as.data.frame(coef(m2)[["Subject"]]))
+
+## Kernel density estimates for the distribution of individual intercepts
+intcpt.dens <- list()
+idx <- seq(1, ncol(dfrm), by=2)
+for (i in seq_along(idx))
+  intcpt.dens[[i]] <- density(as.numeric(dfrm[,idx[i]]), adj=1.4)
+len <- length(intcpt.dens[[1]]$x)
+
+## Show all
+cols <- c("grey30", "#D95F02", "#669999")
+xyplot(Reaction ~ Days, data=sleepstudy,
+       xlim=c(0, 8), ylim=c(150, 450), ylab="Fitted reaction time",
+       scales=list(x=list(at=seq(0, 8, by=1))),
+       key=list(corner=c(0,1), text=list(c("within-group",
+                                 "random intercept",
+                                 "random intercept and slope"),
+                                 col=cols, cex=0.8)),
+       panel=function(...) {
+         apply(dfrm[,1:2], 1, panel.abline, col=cols[1], alpha=.5, lwd=1.2)
+         apply(dfrm[,3:4], 1, panel.abline, col=cols[2], alpha=.5, lwd=1.2)
+         for (i in seq_along(idx))
+         panel.lines(x=c(intcpt.dens[[i]]$y*100, rep(0, len)),
+                     y=c(intcpt.dens[[i]]$x, rev(intcpt.dens[[i]]$x)), col=cols[i], lwd=1.8)
+})
+```
+
 Methods
 -------
 
@@ -400,27 +451,6 @@ best methods needed for large variance, small clusters
 - stochastic (Monte Carlo): frequentist and Bayesian
     - [@booth_maximizing_1999; @sung_monte_2007; @ponciano_hierarchical_2009]
     -   usually slower but flexible and accurate
-
-## Laplace-approximation diagnostics
-
-```{r lapl,fig.width=10,fig.height=10}
-library(lattice)
-aspect <- 0.6
-xlab <- "z"; ylab <- "density"; type <- c("g","l"); scaled <- FALSE
-mm <- readRDS("../data/toenail_lapldiag.rds")
-print(xyplot(y ~ zvals|id, data=mm,
-             type=type, aspect=aspect,
-             xlab=xlab,ylab=ylab,
-             as.table=TRUE,
-             panel=function(x,y,...){
-    if (!scaled) {
-        panel.lines(x, dnorm(x), lty=2)
-    } else {
-        panel.abline(h=1, lty=2)
-    }
-    panel.xyplot(x,y,...)
-}))
-```
 
 ## Estimation: *Culcita* [@mckeon_multiple_2012]
 
@@ -490,6 +520,15 @@ approximation for GLM(M)s
 -  `glmmTMB`: zero-inflated and other distributions
 -  `brms`,`rstanarm`: interfaces to Stan
 -  `INLA`: spatial and temporal correlations
+- [rethinking package](https://github.com/rmcelreath/rethinking)
+
+## Toolboxes
+
+- JAGS (R: `rjags`, `r2jags`)
+- TensorFlow (R: `greta`)
+- NIMBLE 
+- Stan (R: `rstan`)
+- TMB (R: `TMB`)
 
 ## On beyond R
 
@@ -497,9 +536,7 @@ approximation for GLM(M)s
 -   SAS: PROC MIXED, NLMIXED
 -   AS-REML
 -   Stata (GLLAMM, xtmelogit)
--   AD Model Builder; Template Model Builder
 -   HLM, MLWiN
--   JAGS, Stan, [rethinking package](https://github.com/rmcelreath/rethinking)
 
 ![image](pix/300px-On_Beyond_Zebra.jpg){width="4cm"}
 
@@ -512,10 +549,6 @@ approximation for GLM(M)s
 -   Big data: speed!
 -   Model diagnosis
 -   Confidence intervals accounting for uncertainty in variances
-
-See also:
-<https://rawgit.com/bbolker/mixedmodels-misc/master/ecostats_chap.html>
-<https://groups.nceas.ucsb.edu/non-linear-modeling/projects>
 
 ## Spatial and temporal correlations
 
@@ -538,11 +571,9 @@ See also:
 
 ## 
 
--   <http://ms.mcmaster.ca/~bolker/misc/private/14-Fox-Chap13.pdf>
-
--   <https://rawgit.com/bbolker/mixedmodels-misc/master/ecostats_chap.html>
-
--   [@bolker_glmm_2014]
+- <http://ms.mcmaster.ca/~bolker/misc/private/14-Fox-Chap13.pdf>
+- <https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html>
+-  @bolker_glmm_2014
 
 ![image](pix/foxbook.png)
 

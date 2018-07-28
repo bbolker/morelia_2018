@@ -27,9 +27,8 @@ many scientific results are unreproducible
 
 - lack of openness (data/methods)
 - questionable research practices (QRPs)
-- p-hacking; snooping [@simmons_false-positive_2011]; "Texas sharpshooter fallacy"
-- "garden of forking paths" (Gelman)
-
+- p-hacking; snooping; researcher degrees of freedom [@simmons_false-positive_2011]; "Texas sharpshooter fallacy"
+- "garden of forking paths" [@gelman_statistical_2014]
 
 **analytic decisions must be made independently of the data**
 
@@ -47,7 +46,7 @@ at least recognize the line between confirmatory and exploratory analyses
 - need to specify effects and variances (standard deviations)
 - simple designs (t-test, ANOVA, etc.)
      - base R: `apropos("power")`
-     - [Russ Lenth home page](http://homepage.stat.uiowa.edu/~rlenth/Power/oldversion.html)
+     - Russ Lenth's [power calculator page](http://homepage.stat.uiowa.edu/~rlenth/Power/oldversion.html)
 - most power analyses are crude/order-of-magnitude
 - simulation-based power analysis (@Bolker2008 ch. 5)
 

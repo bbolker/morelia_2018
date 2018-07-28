@@ -8,4 +8,5 @@ Arabidopsis,Banta.RData,@banta_comprehensive_2010
 Contraception,`mlmRev` package,@steele_immunization_1996
 Gopher tortoises,gopherdat2.RData,@ozgul_upper_2009
 sea turtle nesting,dufemalepers.csv,@Tiwari+2006
-AIDS,aids.csv,Dobson and Barnett
+AIDS,aids.csv,Dobson and Barnett,@dobson_introduction_2008
+singing mouse,singingmouse.csv,@pasch_interspecific_2013

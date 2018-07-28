@@ -23,7 +23,8 @@ diag_pkgs <- c("afex", "agridat", "AICcmodavg", "aods3", "arm",
                "MuMIn", "pbkrtest", "RLRsim", "rockchalk", "sjPlot",
                "sjstats", "stargazer", "texreg")
 ## graphics
-graph_pkgs <- c("cowplot", "dotwhisker", "GGally", "ggalt", "ggplot2",
+graph_pkgs <- c("cowplot", "directlabels",
+                "dotwhisker", "GGally", "ggalt", "ggplot2",
                 "ggpubr", "ggstance", "gridExtra", "plotMCMC",
                 "plotrix", "viridis")
 

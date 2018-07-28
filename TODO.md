@@ -2,7 +2,13 @@
      - ggplot: cut down, emphasize grouping
           colour vs group aesthetic vs path
           star geom?? geom_encircle
-     - inference etc.: modify.
+	  - inference etc.: modify.
+      - add singing mouse data?
+
+
+tidyverse???
+
+incorporate stuff from uqam/mixed2.Rnw		  
           - contrasts
 	      - Wald vs LRT
 		  - Z vs t

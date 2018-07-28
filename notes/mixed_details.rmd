@@ -68,7 +68,30 @@ Don't need explicit nesting if your sub-groups are uniquely labeled (i.e. `A1`, 
 
 Maximal model **often won't work**
 
+## Random-slopes models: what does `(x|g)` really do?
+
+- equivalent to `(1+x|g)`
+- both intercept (baseline) and slope vary across groups
+- estimates **bivariate** zero-centered distribution:
+
+$$
+(\textrm{intercept}, \textrm{slope}) =
+\textrm{MVN}\left(\boldsymbol 0,
+\left[
+\begin{array}{2}
+\sigma^2_\textrm{int} &
+\sigma_{\textrm{int},\textrm{slope}} \\
+\sigma_{\textrm{int},\textrm{slope}} & 
+\sigma^2_\textrm{slope}
+\right]
+\right)
+$$
+
+- maximal model can get very complicated (e.g. `(1+x+y+z+...|g)`: $n$ effects require $n(n+1)/2$ variances + covariances
+
 ## Factors vs. continuous variables in terms
+
+- `(f|g)` doesn't work as expected when 
 
 ## Simplified versions of models
 
