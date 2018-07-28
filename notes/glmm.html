@@ -213,6 +213,13 @@ and interactions</li>
 </ul>
 <p>See also <span class="citation">Crawley (2002)</span>; <span class="citation">Gelman (2005)</span></p>
 <p>If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.</p>
+<div id="avoiding-mm" class="section level3">
+<h3>Avoiding MM</h3>
+<ul>
+<li>average: for <em>nested</em> LMMs (when variance within lower levels is not of interest) <span class="citation">(Murtaugh, 2007)</span></li>
+<li>use fixed effects (or two-stage models) instead of random effects when (1) samples per block are large (shrinkage will be unimportant) or (2) number of samples is small (you will save few degrees of freedom, and variance estimates are likely to be bad anyway)</li>
+</ul>
+</div>
 </div>
 <div id="estimation" class="section level1">
 <h1>Estimation</h1>
@@ -431,6 +438,9 @@ regularization, model selection, penalized methods (lasso/fence)</li>
 </div>
 <div id="ref-mckeon_multiple_2012">
 <p>McKeon, C. S., Stier, A., McIlroy, S., &amp; Bolker, B. (2012). Multiple defender effects: Synergistic coral defense by mutualist crustaceans. <em>Oecologia</em>, <em>169</em>(4), 1095–1103. <a href="http://doi.org/10.1007/s00442-012-2275-2" class="uri">http://doi.org/10.1007/s00442-012-2275-2</a></p>
+</div>
+<div id="ref-murtaugh_simplicity_2007">
+<p>Murtaugh, P. A. (2007). Simplicity and complexity in ecological data analysis. <em>Ecology</em>, <em>88</em>(1), 56–62. Retrieved from <a href="http://www.esajournals.org/doi/abs/10.1890/0012-9658%282007%2988%5B56%3ASACIED%5D2.0.CO%3B2">http://www.esajournals.org/doi/abs/10.1890/0012-9658%282007%2988%5B56%3ASACIED%5D2.0.CO%3B2</a></p>
 </div>
 <div id="ref-ponciano_hierarchical_2009">
 <p>Ponciano, J. M., Taper, M. L., Dennis, B., &amp; Lele, S. R. (2009). Hierarchical models in ecology: Confidence intervals, hypothesis testing, and model selection using data cloning. <em>Ecology</em>, <em>90</em>(2), 356–362. Retrieved from <a href="http://www.jstor.org/stable/27650990" class="uri">http://www.jstor.org/stable/27650990</a></p>

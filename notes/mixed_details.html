@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Bolker" />
 
-<meta name="date" content="2018-07-27" />
+<meta name="date" content="2018-07-28" />
 
 <title>Linear mixed models in R: nitty-gritty</title>
 
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Linear mixed models in R: nitty-gritty</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>27 July 2018</em></h4>
+<h4 class="date"><em>28 July 2018</em></h4>
 
 </div>
 
@@ -195,8 +195,34 @@ As above, but <span class="math inline">\(S_{0s}\)</span>, <span class="math inl
 </ul>
 <p>Maximal model <strong>often won’t work</strong></p>
 </div>
+<div id="random-slopes-models-what-does-xg-really-do" class="section level2">
+<h2>Random-slopes models: what does <code>(x|g)</code> really do?</h2>
+<ul>
+<li>equivalent to <code>(1+x|g)</code></li>
+<li>both intercept (baseline) and slope vary across groups</li>
+<li>estimates <strong>bivariate</strong> zero-centered distribution:</li>
+</ul>
+<p><span class="math display">\[
+(\textrm{intercept}, \textrm{slope}) =
+\textrm{MVN}\left(\boldsymbol 0,
+\left[
+\begin{array}{2}
+\sigma^2_\textrm{int} &amp;
+\sigma_{\textrm{int},\textrm{slope}} \\
+\sigma_{\textrm{int},\textrm{slope}} &amp; 
+\sigma^2_\textrm{slope}
+\right]
+\right)
+\]</span></p>
+<ul>
+<li>maximal model can get very complicated (e.g. <code>(1+x+y+z+...|g)</code>: <span class="math inline">\(n\)</span> effects require <span class="math inline">\(n(n+1)/2\)</span> variances + covariances</li>
+</ul>
+</div>
 <div id="factors-vs.continuous-variables-in-terms" class="section level2">
 <h2>Factors vs. continuous variables in terms</h2>
+<ul>
+<li><code>(f|g)</code> doesn’t work as expected when</li>
+</ul>
 </div>
 <div id="simplified-versions-of-models" class="section level2">
 <h2>Simplified versions of models</h2>

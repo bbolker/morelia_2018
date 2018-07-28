@@ -147,7 +147,6 @@ text(bb[col(p)][p>0],midb[p>0],c(0,1,2)[row(p)][p>0])
 par(op)
 ```
 
-
 ## Environmental stress: *Glycera* cell survival (D. Julian unpubl.)
 
 ```{r glycera}
@@ -318,6 +317,11 @@ the grouping variable;
 See also @Crawley2002; @gelman_analysis_2005
 
 If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.
+
+### Avoiding MM
+
+* average: for *nested* LMMs (when variance within lower levels is not of interest) [@murtaugh_simplicity_2007] 
+* use fixed effects (or two-stage models) instead of random effects when (1) samples per block are large (shrinkage will be unimportant) or (2) number of samples is small (you will save few degrees of freedom, and variance estimates are likely to be bad anyway)
 
 Estimation
 ==========
