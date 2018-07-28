@@ -1,0 +1,63 @@
+---
+title: "Bayesian lab"
+author: Ben Bolker
+bibliography: "../glmm.bib"
+date: "`r format(Sys.time(), '%d %B %Y ')`"
+---
+
+```{r pkgs}
+library(MCMCglmm)
+library(brms)
+library(coda)
+library(lattice)
+library(reshape2) ## for melt()
+## devtools::install_github("mjskay/tidybayes")
+## library(tidybayes) ## optional
+library(ggplot2); theme_set(theme_bw())
+```
+
+```{r data}
+load("../data/starling.RData")   ## loads "dataf"
+```
+
+### Analyze with `MCMCglmm`
+
+(optional)
+
+`MCMCglmm` does a Bayesian analysis, which can be useful for more
+flexible inference, and has some more flexible covariance structures etc..
+For basic models, the syntax is very similar to `lme4`/`nlme`.
+
+```{r mcmcglmm,message=FALSE,cache=TRUE}
+mcmcglmm1 <- MCMCglmm(stmass~mnth*roostsitu,
+                      random=~subject,
+                      data=dataf,
+                      verbose=FALSE)
+```
+We use `verbose=FALSE` to turn off the progress messages, which would be ugly in this document but are generally useful.
+
+* Compare the results (use `summary()`: printing out the a raw `MCMCglmm` model is ugly).
+
+For MCMC approaches, it is your responsibility to check that the chain(s) are well-behaved.
+
+Try this:
+```{r mcmcplot1,fig.keep="none"}
+library("coda")
+xyplot(as.mcmc(mcmcglmm1$Sol),layout=c(2,4))
+```
+
+These look the way they should (featureless
+"white noise" - no trends or slow variation).
+
+You can plot the distributions:
+```{r plotdens,fig.keep="none"}
+densityplot(mcmcglmm1$Sol)
+```
+but I prefer *violin plots* for this case:
+```{r plotviolin,fig.keep="none"}
+md <- reshape2::melt(as.matrix(mcmcglmm1$Sol)) ## change matrix to long form
+ggplot(subset(md,Var2!="(Intercept)"),
+       aes(Var2,value))+geom_violin(fill="grey")+
+    geom_hline(yintercept=0,lty=2)+
+    coord_flip()
+```    
