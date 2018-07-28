@@ -2,7 +2,7 @@
 title: Data visualization, focusing on ggplot and multilevel data
 author: Ben Bolker
 date: "`r format(Sys.time(), '%H:%M %d %B %Y')`"
-bibliography: ../vis.bib
+bibliography: [../vis.bib, ../glmm.bib]
 output: html_document
 ---
 
@@ -49,10 +49,10 @@ library("ggplot2"); theme_set(theme_bw())
 * how closely should one match analyses with graphs?  "Let the data speak for themselves" vs "Tell a story"
 * display data (e.g. boxplots, standard deviations) or inferences from data (confidence intervals)
 * superimposing model fits (`geom_smooth`)
-* avoid excessive cleverness/data density
+* don't be too clever/cram too much in
 * coefficient plots vs parameter tables [@gelman_lets_2002]
-* tradeoff between visual design (tweaking) and reproducibility: learning to futz with label positioning etc. may pay off in the long run (a few tools exist for automatic placement)
-* order factors in a sensible order (i.e *not* alphabetical or numerical unless (1) the labels have some intrinsic meaning or (2) you expect that readers will be interested in looking up particular levels in the plot).  This is sometimes called the "what's so special about Alabama?" problem, although the Canadian version would substitute "Alberta".
+* tradeoff between visual design (tweaking) and reproducibility: learning programmatic methods may pay off in the long run (see e.g. `directlabels`, `ggrepel` packages)
+* order factors sensibly (i.e *not* alphabetical or numerical unless (1) the labels have some intrinsic meaning or (2) you expect that readers will be interested in looking up particular levels in the plot).  "what's so special about Alabama?" (Aguascalientes, Alberta ...)
 
 ## Basic criteria for data presentation
 
@@ -85,34 +85,22 @@ Visual perception of quantitative information: [Cleveland hierarchy](http://proc
 
 * faceting (= trellis plots = small multiples) vs grouping ("spaghetti plots")
 * join data within a group by lines (perhaps thin/transparent)
-* can colour lines by group (get legend), but more useful for explanatory than presentation graphics
+* colour lines by group (more useful for explanatory than presentation graphics)
+* dynamic graphics (hovertext)
+* other grouping techniques: `ggalt::geom_encircle`, `stat_centseg` (from `../R/geom_cstar.R`)
+* depends on context: how many groups, what kind of predictors?
 
-```{r ggplot_mult,fig.keep="none",message=FALSE}
-data("cbpp",package="lme4")
-## make period *numeric* so lines will be connected/grouping won't happen
-cbpp2 <- transform(cbpp,period=as.numeric(as.character(period)))
-g0 <- ggplot(cbpp2,aes(period,incidence/size))
-## spaghetti plot
-g1 <- g0+geom_line(aes(colour=herd))+geom_point(aes(size=size,colour=herd))
-g2 <- ggplot(cbpp2,aes(period,incidence/size,colour=herd))
-(g3 <- g2 + geom_line()+geom_point(aes(size=size)))
-## facet instead
-(g4 <- g1+facet_wrap(~herd))
-## order by average prop. incidence
-g1 %+% transform(cbpp2,herd=reorder(herd,incidence/size))
-g4 %+% transform(cbpp2,herd=reorder(herd,incidence/size))
-## also consider colouring by incidence/order ...
-```
+`ggplot2` makes it fairly easy to do a simple *two-stage* analysis on the fly, e.g. with the CBPP data discussed below:
 
-Makes it fairly easy to do a simple *two-stage* analysis on the fly:
-```{r ggplot_mult2,fig.keep="none",warning=FALSE}
-g0+geom_point(aes(size=size,colour=herd))+
-    geom_smooth(aes(colour=herd,weight=size),
-                method="glm",
-                method.args=list(family=binomial),
-                se=FALSE)
+```{r ggplot_mult2,eval=FALSE}
+geom_smooth(aes(colour=herd,weight=size),
+            method="glm",
+            method.args=list(family=binomial),
+            se=FALSE)
 ```
 (ignore `glm.fit` warnings if you try this)
+
+
 
 
 ## Challenges
@@ -192,35 +180,61 @@ Possible solutions:
 
 mappings + geoms
 
-## Data
-
-Specified explicitly as part of a `ggplot` call:
-
-```{r ggplot1,message=FALSE,fig.width=4,fig.height=4}
-library(mlmRev)
-head(Oxboys)
-library(ggplot2)
-ggplot(Oxboys)
-```
-
-But that isn't quite enough: we need to specify a *mapping* between variables (columns in the data set) and *aesthetics* (elements of the graphical display: x-location, y-location, colour, size, shape ...)
-
-```{r ggplot2,fig.width=4,fig.height=4}
-ggplot(Oxboys,aes(x=age,y=height))
-```
-
-but (as you can see) that's still not quite enough.  We need to specify some geometric objects (called `geom`s) such as points, lines, etc., that will embody these aesthetics.  The weirdest thing about `ggplot` syntax is that these `geom`s get *added* to the existing `ggplot` object that specifies the data and aesthetics; unless you explicitly specify other aesthetics, they are inherited from the initial `ggplot` call.
-
-```{r ggplot3,fig.width=4,fig.height=4}
-ggplot(Oxboys,aes(x=age,y=height))+geom_point()
-```
-
-- many more geoms (lines, bars, etc.)
-- summarizers: smooth lines and summaries (`geom_smooth`, `stat_sum`)
-- control of scales (e.g. log transforms, colors, etc.)
-- faceting (grid and wrap)
-
 See [Karthik Ram's ggplot intro](https://github.com/karthikram/ggplot-lecture) or [my intro for disease ecologists](http://ms.mcmaster.ca/~bolker/eeid/ecology/ggplot.pdf), among many others.
+
+# Example/exercise
+
+## cbpp data set
+Contagious bovine pleuropneumonia (CBPP): from @lesnoff_within-herd_2004, via the `lme4` package. See `?lme4::cbpp` for details.
+
+```{r ggplot2}
+data("cbpp",package="lme4")
+## make period *numeric* so lines will be connected/grouping won't happen
+cbpp2 <- transform(cbpp,period=as.numeric(as.character(period)))
+g0 <- ggplot(cbpp2,aes(period,incidence/size))
+```
+
+### spaghetti plot
+
+```{r spaghetti}
+g1 <- g0+geom_line(aes(colour=herd))+geom_point(aes(size=size,colour=herd))
+```
+
+Do we need the colours?
+```{r}
+g2 <- g0+geom_line(aes(group=herd))+geom_point(aes(size=size,group=herd))
+```
+
+Facet instead:
+
+```{r}
+g4 <- g1+facet_wrap(~herd)
+```
+
+Order by average prop. incidence, using the `+` trick:
+
+```{r}
+cbpp2R <- transform(cbpp2,herd=reorder(herd,incidence/size))
+g4 %+% cbpp2R
+```
+
+## gopher tortoise mycoplasma data
+
+Gopher tortoise data (from @ozgul_upper_2009, see [ecostats chapter](http://bbolker.github.io/mixedmodels-misc/ecostats_chap.html#data))
+
+Plot density of shells from freshly dead tortoises (`shells/Area`) as a function of mycoplasmal prevalence (%, `prev`): you may want to consider site, year of collection, or population density as well.
+
+```{r}
+load("../data/gopherdat2.RData")
+g5 <- ggplot(Gdat,aes(prev,shells/Area))+geom_point()
+```
+
+```{r}
+library(ggalt)
+source("../R/geom_cstar.R")
+g5+geom_encircle(aes(group=Site))
+g5+stat_centseg(aes(group=Site),cfun=mean)
+```
 
 ```{r sessioninfo}
 sessionInfo()
