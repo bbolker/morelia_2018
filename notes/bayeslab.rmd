@@ -20,9 +20,8 @@ library(ggplot2); theme_set(theme_bw())
 load("../data/starling.RData")   ## loads "dataf"
 ```
 
-### Analyze with `MCMCglmm`
+### Analyze starling data with `MCMCglmm`
 
-(optional)
 
 `MCMCglmm` does a Bayesian analysis, which can be useful for more
 flexible inference, and has some more flexible covariance structures etc..
@@ -36,14 +35,18 @@ mcmcglmm1 <- MCMCglmm(stmass~mnth*roostsitu,
 ```
 We use `verbose=FALSE` to turn off the progress messages, which would be ugly in this document but are generally useful.
 
-* Compare the results (use `summary()`: printing out the a raw `MCMCglmm` model is ugly).
+- Compare the results (use `summary()`: printing out the a raw `MCMCglmm` model is ugly).
 
 For MCMC approaches, it is your responsibility to check that the chain(s) are well-behaved.
 
 Try this:
 ```{r mcmcplot1,fig.keep="none"}
 library("coda")
-xyplot(as.mcmc(mcmcglmm1$Sol),layout=c(2,4))
+xyplot(
+    as.mcmc(mcmcglmm1$Sol),  ## convert matrix to `mcmc` object
+    layout=c(2,4)            ## customize panel arrangement
+    ## (default layout )
+)
 ```
 
 These look the way they should (featureless

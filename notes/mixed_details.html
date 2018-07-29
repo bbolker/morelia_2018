@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Bolker" />
 
-<meta name="date" content="2018-07-28" />
+<meta name="date" content="2018-07-29" />
 
 <title>Linear mixed models in R: nitty-gritty</title>
 
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Linear mixed models in R: nitty-gritty</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>28 July 2018</em></h4>
+<h4 class="date"><em>29 July 2018</em></h4>
 
 </div>
 
@@ -139,6 +139,17 @@ $(document).ready(function () {
 <li>remember we want <strong>conditional</strong> distribution to be Normal, not marginal</li>
 <li>Box-Cox not implemented: could try <code>MASS::boxcox()</code> on residuals</li>
 <li>brute-force: if it makes sense or <em>if</em> residuals look bad, try log/sqrt?</li>
+</ul>
+</div>
+<div id="look-at-your-data" class="section level2">
+<h2>Look at your data!</h2>
+<ul>
+<li>use <code>table()</code> to confirm how many observations per level of factor
+<ul>
+<li>which factors covary?</li>
+<li>balanced or not?</li>
+</ul></li>
+<li>plot the data</li>
 </ul>
 </div>
 <div id="random-effects-reminder" class="section level2">
@@ -206,22 +217,17 @@ As above, but <span class="math inline">\(S_{0s}\)</span>, <span class="math inl
 (\textrm{intercept}, \textrm{slope}) =
 \textrm{MVN}\left(\boldsymbol 0,
 \left[
-\begin{array}{2}
-\sigma^2_\textrm{int} &amp;
+\begin{array}{cc}
+\sigma^2_{\textrm{int}} &amp;
 \sigma_{\textrm{int},\textrm{slope}} \\
 \sigma_{\textrm{int},\textrm{slope}} &amp; 
-\sigma^2_\textrm{slope}
+\sigma^2_{\textrm{slope}}
 \right]
 \right)
 \]</span></p>
+<hr />
 <ul>
-<li>maximal model can get very complicated (e.g. <code>(1+x+y+z+...|g)</code>: <span class="math inline">\(n\)</span> effects require <span class="math inline">\(n(n+1)/2\)</span> variances + covariances</li>
-</ul>
-</div>
-<div id="factors-vs.continuous-variables-in-terms" class="section level2">
-<h2>Factors vs. continuous variables in terms</h2>
-<ul>
-<li><code>(f|g)</code> doesn’t work as expected when</li>
+<li><h2 id="maximal-model-can-get-very-complicated-e.g.-1xyz...g-n-effects-require-nn12-variances-covariances">maximal model can get very complicated (e.g. <code>(1+x+y+z+...|g)</code>: <span class="math inline">\(n\)</span> effects require <span class="math inline">\(n(n+1)/2\)</span> variances + covariances</h2></li>
 </ul>
 </div>
 <div id="simplified-versions-of-models" class="section level2">
@@ -236,8 +242,10 @@ As above, but <span class="math inline">\(S_{0s}\)</span>, <span class="math inl
 <li><code>afex::mixed</code> can do this</li>
 <li>independent model is no longer invariant to shifts/reparameterization</li>
 </ul></li>
-<li></li>
 </ul>
+</div>
+<div id="section" class="section level2">
+<h2></h2>
 </div>
 <div id="what-is-a-practical-model" class="section level2">
 <h2>What is a practical model?</h2>
@@ -270,8 +278,54 @@ As above, but <span class="math inline">\(S_{0s}\)</span>, <span class="math inl
 <div id="fit-model" class="section level2">
 <h2>Fit model</h2>
 </div>
-<div id="diagnostics" class="section level2 unnumbered">
-<h2>Diagnostics</h2>
+<div id="diagnostics-residual-scale" class="section level2">
+<h2>Diagnostics: residual scale</h2>
+<p>Similar to generalized linear models: fitted vs. residual, scale-location, Q-Q</p>
+</div>
+<div id="inference-fixed-effects-wald" class="section level2">
+<h2>Inference: fixed effects, Wald</h2>
+<ul>
+<li>parameter estimates: <code>summary()</code></li>
+<li>termwise tests: <code>car::Anova</code>, <code>afex::anova</code></li>
+<li>contrasts/effects/post-hoc tests: <code>emmeans</code>, <code>effects</code> packages</li>
+</ul>
+</div>
+<div id="degrees-of-freedom" class="section level2">
+<h2>Degrees of freedom</h2>
+<ul>
+<li>level-counting: <code>R/calcDenDF.R</code></li>
+<li><code>lmerTest</code>/<code>afex</code>; Satterthwaite, Kenward-Roger</li>
+</ul>
+</div>
+<div id="inference-fixed-effects-likelihood-ratio-test" class="section level2">
+<h2>Inference: fixed effects, likelihood ratio test</h2>
+<ul>
+<li>individual parameters: <code>profile()</code>, <code>confint()</code></li>
+<li>fit pairwise models and use <code>anova()</code> to compare</li>
+<li><code>drop1</code>, <code>afex::anova()</code></li>
+</ul>
+</div>
+<div id="inference-parametric-bootstrap" class="section level2">
+<h2>Inference: parametric bootstrap</h2>
+<ul>
+<li><code>pbkrtest</code></li>
+<li><code>confint(.,method=&quot;boot&quot;)</code></li>
+</ul>
+</div>
+<div id="inference-random-effects" class="section level2">
+<h2>Inference: random effects</h2>
+<ul>
+<li>Wald is probably very bad</li>
+<li>profile, <code>anova()</code></li>
+<li>parametric bootstrap</li>
+<li>boundary problems</li>
+</ul>
+</div>
+<div id="inference-cis-on-predictions-etc." class="section level2">
+<h2>Inference: CIs on predictions etc.</h2>
+<ul>
+<li></li>
+</ul>
 <div id="refs" class="references">
 <div id="ref-bolker_glmm_2014">
 <p>Bolker, Benjamin M. 2015. “Linear and Generalized Linear Mixed Models.” In <em>Ecological Statistics: Contemporary Theory and Application</em>, edited by Gordon A. Fox, Simoneta Negrete-Yankelevich, and Vinicio J. Sosa. Oxford University Press.</p>

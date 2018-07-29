@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Bolker" />
 
-<meta name="date" content="2018-07-27" />
+<meta name="date" content="2018-07-29" />
 
 <title>Bayesian lab</title>
 
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Bayesian lab</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>27 July 2018</em></h4>
+<h4 class="date"><em>29 July 2018</em></h4>
 
 </div>
 
@@ -158,9 +158,8 @@ library(reshape2) ## for melt()
 ## library(tidybayes) ## optional
 library(ggplot2); theme_set(theme_bw())</code></pre>
 <pre class="r"><code>load(&quot;../data/starling.RData&quot;)   ## loads &quot;dataf&quot;</code></pre>
-<div id="analyze-with-mcmcglmm" class="section level3">
-<h3>Analyze with <code>MCMCglmm</code></h3>
-<p>(optional)</p>
+<div id="analyze-starling-data-with-mcmcglmm" class="section level3">
+<h3>Analyze starling data with <code>MCMCglmm</code></h3>
 <p><code>MCMCglmm</code> does a Bayesian analysis, which can be useful for more flexible inference, and has some more flexible covariance structures etc.. For basic models, the syntax is very similar to <code>lme4</code>/<code>nlme</code>.</p>
 <pre class="r"><code>mcmcglmm1 &lt;- MCMCglmm(stmass~mnth*roostsitu,
                       random=~subject,
@@ -173,12 +172,16 @@ library(ggplot2); theme_set(theme_bw())</code></pre>
 <p>For MCMC approaches, it is your responsibility to check that the chain(s) are well-behaved.</p>
 <p>Try this:</p>
 <pre class="r"><code>library(&quot;coda&quot;)
-xyplot(as.mcmc(mcmcglmm1$Sol),layout=c(2,4))</code></pre>
+xyplot(
+    as.mcmc(mcmcglmm1$Sol),  ## convert matrix to `mcmc` object
+    layout=c(2,4)            ## customize panel arrangement
+    ## (default layout )
+)</code></pre>
 <p>These look the way they should (featureless “white noise” - no trends or slow variation).</p>
 <p>You can plot the distributions:</p>
 <pre class="r"><code>densityplot(mcmcglmm1$Sol)</code></pre>
 <p>but I prefer <em>violin plots</em> for this case:</p>
-<pre class="r"><code>md &lt;- melt(as.matrix(mcmcglmm1$Sol)) ## change matrix to long form
+<pre class="r"><code>md &lt;- reshape2::melt(as.matrix(mcmcglmm1$Sol)) ## change matrix to long form
 ggplot(subset(md,Var2!=&quot;(Intercept)&quot;),
        aes(Var2,value))+geom_violin(fill=&quot;grey&quot;)+
     geom_hline(yintercept=0,lty=2)+

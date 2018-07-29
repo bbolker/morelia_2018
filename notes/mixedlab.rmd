@@ -152,7 +152,8 @@ cat(lmer2out[17:25],sep="\n")
 
 ## Diagnostic plots
 
-Basic diagnostic plots: fitted vs. residuals, coloured according to the `roostsitu` variable:
+Basic diagnostic plots: fitted vs. residuals, coloured according to the `roostsitu` variable (`col=dataf$roostsitu`), point type according to month (`pch=`).
+
 ```{r lmediag}
 plot(lmer2,col=dataf$roostsitu,pch=dataf$mnth,id=0.05)
 ```
@@ -177,7 +178,7 @@ Q-Q plot (a straight line indicates normality)
 qqmath(lmer2,col=dataf$roostsitu,pch=dataf$mnth)
 ```
 
-We can also do this with `tidy::augment()` and `stat_qq()` (although there are also some some limitations - `colour` argument doesn't actually work...)
+We can also do this with `broom.mixed::augment()` and `stat_qq()` (although there are also some some limitations - `colour` argument doesn't actually work...)
 ```{r ggqq,fig.keep="none",cache=TRUE}
 ggplot(augment(lmer2),
        aes(sample=.resid/sd(.resid)))+  ## scale to variance=1
@@ -187,12 +188,17 @@ ggplot(augment(lmer2),
 
 There are some deviations here, but not enough that I would worry very much.
 In particular, the distribution is slightly *thin-tailed* (the smallest residuals are largest than expected, and the largest residuals are smaller than expected),
-which would 
+which would make the results slightly conservative (a fat-tailed distribution would make them anticonservative).
 
-Boxplots of residuals subdivided by `roostsitu` (it's a quirk that you have to put the grouping variable on the *left* side of the formula here):
+Boxplots of residuals subdivided by `roostsitu` (you have to put the grouping variable on the *left* side of the formula here):
 
 ```{r diagbox}
 plot(lmer2,roostsitu~resid(.))
+```
+
+Might be easier with `augment`:
+
+```{r diagbox_gg}
 ```
 
 Plot random effects to look for outliers:

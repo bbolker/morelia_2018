@@ -5,9 +5,17 @@ bibliography: "../glmm.bib"
 date: "`r format(Sys.time(), '%d %B %Y ')`"
 ---
 
+## Why Bayes?
+
+- philosophically satisfying
+- addresses model complexity problems  
+(use regularizing or truly informative priors)
+- accounts for all levels of uncertainty
+- makes post-modeling inference easy
+
 ## Basic Bayes
 
-Posterior probability = likelihood $\times$ prior
+Posterior probability $\propto$ likelihood $\times$ prior
 
 ```{r bayesplot1,echo=FALSE}
 data("ReedfrogPred",package="emdbook")
@@ -58,6 +66,8 @@ legend(2,0.57,c("by species","by group"),
 par(op)
 ```
 
+---
+
 ```{r bayes_prior_unif_cont,echo=FALSE}
 minx <- 10
 maxx <- 100
@@ -94,14 +104,15 @@ par(op)
 
 ## Priors, continued
 
-- debate over best way to use priors continues
+- continued debate over priors 
 - "uninformative" or "flat": probably not really
 - "conjugate": mathematically/computationally convenient
 - **regularizing** priors: neutral, but not completely uninformative
      - keeps model from misbehaving
 	 - **informative** priors: non-neutral, real information [@Crome+1996,@McCarthy2007]
 - simple 'uninformative' priors for variances etc. might not be [@gelman_prior_2006]
-- uniform priors are simple but maybe problematic [@carpenter_computational_2017]
+- uniform priors are simple but problematic [@carpenter_computational_2017]
+- remember, scale of parameter matters!
 
 ```{r echo=FALSE,eval=FALSE}
 ## faffing around with priors peaked near zero
@@ -137,5 +148,79 @@ i2(f2)
 
 ## Sampling
 
-- in prin
+Almost all modern Bayesian methods depend on stochastic sampling schemes
+
+e.g.
+
+- *conjugate sampling*: for easy cases where we can derive the posterior distribution
+- *Gibbs sampling*: stepwise sampling of different model components
+- *Metropolis-Hastings*: choose *candidate distribution* and accept/reject
+- *Hamiltonian Monte Carlo*
+
 ## Metropolis-Hastings
+
+- sampling parameter space
+- start at a point (set of parameter values) $A$
+    - pick a new point $B$ (from *candidate distribution*)
+    - evaluate $P$= prior $\times$ likelihood
+    - always accept if $P(B)$ better than $P(A)$
+	- if $B$ is worse, accept with probability $P(B)/P(A)$
+	- (extra term if candidate distribution is asymmetric)
+	- generally converges to posterior distribution
+
+## acceptance ratio
+
+- candidate distribution too big: lots of rejection
+- candidate distribution too small: lots of acceptance, but small moves
+- either problem leads to inefficient sampling, highly correlated chains
+- optimal acceptance $\approx 20\%$
+
+## Hamiltonian MC
+
+- start at a point
+- simulate a particle moving along the surface with *random* momentum
+- hard parts: finding the gradient, knowing when to stop ("No U-Turn Sampler")
+
+## Burn-in, adaptation and thinning
+
+- *burn-in*: wait for chain to travel from starting point to highest posterior density region
+- *adaptation*: use chain performance (acceptance/rejection) to tune candidate distribution
+- *thinning*: if chain is correlated, subsample (e.g. down to 1000 samples)
+
+## Multiple chains
+
+- Best way of assessing convergence
+- Can be run in parallel (different cores/machines)
+- Start at widely dispersed points (but workable)
+- Run until coverage of chains overlaps
+
+## Diagnostics: tests of convergence
+
+- Gelman-Rubin statistic (*potential scale reduction factor*: $R < 1.2$); needs multiple chains
+- effective sample size ($>500$)
+- traceplot (should look like white noise)
+
+## Tackling fitting/convergence problems
+
+- strengthen priors (keep model from getting in trouble)
+- simplify model
+- reparameterize (?)
+- run the model for longer (and thin correspondingly)
+
+## Diagnostics: model adequacy
+
+- plots of predictions
+- posterior predictive distributions
+- parameter correlations: `pairs(fitted,gap=0,pch=".")`
+
+## Model goodness of fit (relative)
+
+- leave-one-out cross-validation (`loo`)
+- WAIC
+
+## Inference
+
+- samplers return a *matrix* of parameter values (values of each parameter for each sample)
+- Posterior medians (or means)
+- Quantile intervals (`quantile()`)
+     - or *highest posterior density* intervals: (`coda::HPDinterval`, `emdbook::HPDregion`)
