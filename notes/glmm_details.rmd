@@ -1,0 +1,50 @@
+---
+title: "Generalized linear mixed models in R: nitty-gritty"
+author: Ben Bolker
+bibliography: "../glmm.bib"
+date: "`r format(Sys.time(), '%d %B %Y ')`"
+---
+
+## Overview
+
+Most aspects of 
+
+## integration methods
+
+- penalized quasi-likelihood
+    - fastest
+    - least accurate
+	- uses quasi-likelihood
+	     - can't restrict Poisson to 1
+	     - don't have profiles, AIC etc.
+- Laplace approximation
+    - fast, flexible compromise
+    - assumes group sampling distribution is approximately Normal
+- adaptive Gauss-Hermite quadrature
+    - slowest
+    - most accurate
+    - most limited
+
+## overdispersion
+
+- reminder: "too much" variance
+- only applies to families with *estimated* variance:  
+e.g. Poisson, binomial ($N>1$)
+
+## dealing with overdispersion
+
+- quasi-likelihood
+- observation-level random effects [@elston_analysis_2001]
+- overdispersed distributions  
+(negative binomial, beta-binomial, etc.)  
+`glmmTMB`/`brms` [@brooks_modeling_2017]
+
+## other diagnostics
+
+- assumption of Normal residuals may not be very good
+- simulated residuals (`DHARMa`)
+
+## zero-inflation
+
+## Complete separation
+

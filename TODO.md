@@ -1,11 +1,15 @@
 - notes!
-     - ggplot: cut down, emphasize grouping
-          colour vs group aesthetic vs path
-          star geom?? geom_encircle
+- datavis:
+      - glyc plot 1 -> ggplot?
+      - second glyc plot?
 	  - inference etc.: modify.
       - add singing mouse data?
-
-
+      - arabidopsis plot as ggplot?
+- glmm 1 or 2:
+      - "dimensions of data size"
+      - REML
+	  
+	  
 tidyverse???
 
 incorporate stuff from uqam/mixed2.Rnw		  

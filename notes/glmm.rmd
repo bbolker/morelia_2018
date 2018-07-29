@@ -3,6 +3,9 @@ title: "generalized linear mixed models"
 author: "Ben Bolker"
 bibliography: "../glmm.bib"
 csl: ../apa.csl
+output:
+   ioslides_presentation
+       toc:true
 header-includes:
 - \usepackage{amsmath}
 - \usepackage{amssymbol}
@@ -18,6 +21,31 @@ header-includes:
 ---
 
 \newcommand{\bm}[1]{#1}
+
+<style>
+.refs {
+   font-size: 16px;
+}
+h2 { 
+ color: #3399ff;		
+}
+h3 { 
+ color: #3399ff;		
+}
+.title-slide {
+   background-color: #55bbff;
+}
+</style>
+<!--    content: url(https://i.creativecommons.org/l/by-sa/4.0/88x31.png)
+>
+<!-- Limit image width and height -->
+<style type="text/css">
+img {     
+  max-height: 560px;     
+  max-width: 800px; 
+}
+</style>
+
 
 ```{r knitr,include=FALSE}
 require("knitr")
@@ -57,7 +85,9 @@ theme_set(theme_bw())
     (e.g. logistic, exponential, hyperbolic)
 -   non-independent (grouped) data
 
-![image](pix/models-glmm.pdf){width="\textwidth"}
+---
+
+![image](pix/models-glmm.png)
 
 ## Coral protection from seastars (*Culcita*) by symbionts [@mckeon_multiple_2012]
 
@@ -260,7 +290,7 @@ plotfun(j.red2,m.acr.nofr,drop.cols=c(4,8))
 
 ## Technical definition
 
-\begin{equation*}
+$$
 \begin{split}
 \underbrace{Y_i}_{\text{response}} & \sim \overbrace{\text{Distr}}^{\substack{\text{conditional} \\ \text{distribution}}}(\underbrace{g^{-1}(\eta_i)}_{\substack{\text{inverse} \\ \text{link} \\ \text{function}}},\underbrace{\phi}_{\substack{\text{scale} \\ \text{parameter}}}) \\
 \underbrace{\boldsymbol \eta}_{\substack{\text{linear} \\ \text{predictor}}} & 
@@ -271,25 +301,20 @@ plotfun(j.red2,m.acr.nofr,drop.cols=c(4,8))
 \underbrace{\boldsymbol b}_{\substack{\text{conditional} \\ \text{modes}}}  & 
 \sim \text{MVN}(\boldsymbol 0, \underbrace{\Sigma(\boldsymbol \theta)}_{\substack{\text{variance-} \\ \text{covariance} \\ \text{matrix}}})
 \end{split}
-\end{equation*}
+$$
 
 ## What are random effects?
 
 A method for …
 
 -   accounting for among-individual, within-block correlation
-
 -   compromising between\
     *complete pooling* (no among-block variance)\
      and *fixed effects* (large among-block variance)
-
 -   handling levels selected at random from a larger population
-
--   sharing information among levels (`*shrinkage
-    estimation*`)
-
+-   sharing information among levels (*shrinkage
+    estimation*)
 -   estimating variability among levels
-
 -   allowing predictions for unmeasured levels
 
 ## Random-effect myths
@@ -301,26 +326,29 @@ A method for …
 -   you should always use a random effect no matter how few levels you
 have
 
-## Use a random effect if:
+## Reasons for random effects (inferential/philosophical) [@bolker_glmm_2014]
 
-(from @bolker_glmm_2014)
-
-- don’t want to test hypotheses about differences between responses at particular levels of
+- **don't** want to
+     - test hypotheses about differences between responses at particular levels of
 the grouping variable;
-- do want to quantify the variability among levels of the grouping variable;
-- do want to make predictions about unobserved levels of the grouping variable;
-- do want to combine information across levels of the grouping variable;
+- **do** want to
+     - quantify variation among groups
+     - make predictions about unobserved groups
+- have levels that are randomly sampled from/representative of a larger population (*exchangeable*)
+
+
+## Reasons for random effects (practical) [@bolker_glmm_2014]
+
+- want to combine information across groups
 - have variation in information per level (number of samples or noisiness);
-- have levels that are randomly sampled from/representative of a larger population;
 - have a categorical predictor that is a nuisance variable (i.e., it is not of direct interest, but should be controlled for).
+- have more than 5-6 groups, or regularizing/using priors (otherwise, use fixed)
 
 See also @Crawley2002; @gelman_analysis_2005
 
-If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.
-
 ### Avoiding MM
 
-* average: for *nested* LMMs (when variance within lower levels is not of interest) [@murtaugh_simplicity_2007] 
+* average: for *nested* LMMs (when uninterested in within-group variation) [@murtaugh_simplicity_2007] 
 * use fixed effects (or two-stage models) instead of random effects when (1) samples per block are large (shrinkage will be unimportant) or (2) number of samples is small (you will save few degrees of freedom, and variance estimates are likely to be bad anyway)
 
 Estimation

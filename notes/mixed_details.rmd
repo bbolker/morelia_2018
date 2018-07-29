@@ -15,6 +15,13 @@ date: "`r format(Sys.time(), '%d %B %Y ')`"
 - Box-Cox not implemented: could try `MASS::boxcox()` on residuals
 - brute-force: if it makes sense or *if* residuals look bad, try log/sqrt?
 
+## Look at your data!
+
+- use `table()` to confirm how many observations per level of factor
+    - which factors covary?
+    - balanced or not?
+- plot the data
+	
 ## Random effects: reminder
 
 (from @bolker_glmm_2014) Use random effects if you
@@ -31,6 +38,7 @@ the grouping variable;
 See also @Crawley2002; @gelman_analysis_2005
 
 If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.
+
 
 ## Formulas
 
@@ -78,20 +86,19 @@ $$
 (\textrm{intercept}, \textrm{slope}) =
 \textrm{MVN}\left(\boldsymbol 0,
 \left[
-\begin{array}{2}
-\sigma^2_\textrm{int} &
+\begin{array}{cc}
+\sigma^2_{\textrm{int}} &
 \sigma_{\textrm{int},\textrm{slope}} \\
 \sigma_{\textrm{int},\textrm{slope}} & 
-\sigma^2_\textrm{slope}
+\sigma^2_{\textrm{slope}}
 \right]
 \right)
 $$
 
+---
+
 - maximal model can get very complicated (e.g. `(1+x+y+z+...|g)`: $n$ effects require $n(n+1)/2$ variances + covariances
-
-## Factors vs. continuous variables in terms
-
-- `(f|g)` doesn't work as expected when 
+    - 
 
 ## Simplified versions of models
 
@@ -102,7 +109,8 @@ $$
 	 - `lme4` version **only works properly for continuous predictors**
 	 - `afex::mixed` can do this
 	 - independent model is no longer invariant to shifts/reparameterization
-- 
+
+## 
 
 ## What is a practical model?
 
@@ -129,4 +137,40 @@ e.g. Normal vs. $t$
 
 ## Fit model
 
-## Diagnostics
+## Diagnostics: residual scale
+
+Similar to generalized linear models: fitted vs. residual,
+scale-location, Q-Q 
+
+## Inference: fixed effects, Wald
+
+- parameter estimates: `summary()`
+- termwise tests: `car::Anova`, `afex::anova`
+- contrasts/effects/post-hoc tests: `emmeans`, `effects` packages
+
+## Degrees of freedom
+
+- level-counting: `R/calcDenDF.R`
+- `lmerTest`/`afex`; Satterthwaite, Kenward-Roger
+
+## Inference: fixed effects, likelihood ratio test
+
+- individual parameters: `profile()`, `confint()`
+- fit pairwise models and use `anova()` to compare
+- `drop1`, `afex::anova()`
+
+## Inference: parametric bootstrap
+
+- `pbkrtest`
+- `confint(.,method="boot")`
+
+## Inference: random effects
+
+- Wald is probably very bad
+- profile, `anova()`
+- parametric bootstrap
+- boundary problems
+
+## Inference: CIs on predictions etc.
+
+- 
