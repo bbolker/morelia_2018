@@ -5,11 +5,11 @@ notes += modeling_inference glmm datavis bayes bayeslab mixed_details mixedlab
 nnhtml := $(notes:%=notes/%.html)
 nnrmd := $(notes:%=notes/%.rmd)
 
-Datasets += aids.csv  Banta.RData  gopherdat2.csv culcitalogreg.csv gopherdat2.RData starling.RData culcita.RData gophertortoise.txt toenail.csv dufemalepers.csv tundra.csv Elston2001_tickdata.txt lizards.csv
+Datasets += aids.csv  Banta.RData  gopherdat2.csv culcitalogreg.csv gopherdat2.RData starling.RData culcita.RData gophertortoise.txt toenail.csv dufemalepers.csv tundra.csv Elston2001_tickdata.txt lizards.csv tundra_agg.rda
 
 dd := $(Datasets:%=data/%)
 
-all: setup.html syllabus.html schedule.html ${nnhtml} ${nnrmd}
+all: glmm_data.zip setup.html syllabus.html schedule.html ${nnhtml} ${nnrmd}
 
 notes/%.rmd:  ${SRCDIR}/notes/%.[Rr]md
 	cp $< $@
