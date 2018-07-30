@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Bolker" />
 
-<meta name="date" content="2018-07-29" />
+<meta name="date" content="2018-07-30" />
 
 <title>Linear mixed models in R: nitty-gritty</title>
 
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Linear mixed models in R: nitty-gritty</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>29 July 2018</em></h4>
+<h4 class="date"><em>30 July 2018</em></h4>
 
 </div>
 
@@ -172,8 +172,44 @@ $(document).ready(function () {
 <li>terms separated by <code>+</code> are independent</li>
 </ul>
 <p>see also: <a href="http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1" class="uri">http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1</a> (Livius)</p>
-<p>—————————–|——————————— <span class="math inline">\(β_0 + β_{1}X_{i} + e_{si}\)</span> | n/a (Not a mixed-effects model) $β_0 + S_{0s} + β_{1}X_{i} + e_{si} $ | <code>∼ X+(1∣Subject)</code><br />
-<span class="math inline">\(β_0 + S_{0s} + (β_{1} + S_{1s})Xi + e_{si}\)</span> | <code>~ X+(1 + X∣Subject)</code> <span class="math inline">\(β_0 + S_{0s} + I_{0i} + (β_{1} + S_{1s})Xi + e_{si}\)</span> | <code>∼ X+(1 + X∣Subject)+(1∣Item)</code> $ β_0 + S_{0s} + I_{0i} + β_{1}X_{i} + e_{si}$ | <code>∼ X+(1∣Subject)+(1∣Item)</code> As above, but <span class="math inline">\(S_{0s}\)</span>, <span class="math inline">\(S_{1s}\)</span> independent | <code>∼ X+(1∣Subject)+(0 + X∣ Subject)+(1∣Item)</code> <span class="math inline">\(β_0 + I_{0i} + (β_{1} + S_{1s})Xi + e_{si}\)</span> | <code>∼ X+(0 + X∣Subject)+(1∣Item)</code> —————————|————————–</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Math</th>
+<th align="left">Rn</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><span class="math inline">\(β_0 + β_{1}X_{i} + e_{si}\)</span></td>
+<td align="left">n/a (Not a mixed-effects model)</td>
+</tr>
+<tr class="even">
+<td align="left"><span class="math inline">\(β_0 + b_{0s} + β_{1}X_{i} + e_{si}\)</span></td>
+<td align="left"><code>∼ X+(1∣Subject)</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><span class="math inline">\(β_0 + b_{0s} + (β_{1} + b_{1s})X_{i} + e_{si}\)</span></td>
+<td align="left"><code>~ X+(1 + X∣Subject)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><span class="math inline">\(β_0 + b_{0s} + b_{0i} + β_{1}X_{i} + e_{si}\)</span></td>
+<td align="left"><code>∼ X+(1∣Subject)+(1∣Item)</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><span class="math inline">\(β_0 + b_{0s} + b_{0i} + (β_{1} + b_{1s})X_{i} + e_{si}\)</span></td>
+<td align="left"><code>∼ X+(1 + X∣Subject)+(1∣Item)</code></td>
+</tr>
+<tr class="even">
+<td align="left">As above, but <span class="math inline">\(b_{0s}\)</span>, <span class="math inline">\(b_{1s}\)</span> independent</td>
+<td align="left"><code>∼ X+(1∣Subject)+(0 + X∣ Subject)+(1∣Item)</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><span class="math inline">\(β_0 + b_{0i} + (β_{1} + b_{1s})X_{i} + e_{si}\)</span></td>
+<td align="left"><code>∼ X+(0 + X∣Subject)+(1∣Item)</code></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="formulas-interactions-nesting-etc." class="section level2">
 <h2>Formulas, interactions, nesting etc.</h2>
@@ -206,18 +242,23 @@ $(document).ready(function () {
 <li>estimates <strong>bivariate</strong> zero-centered distribution:</li>
 </ul>
 <p><span class="math display">\[
-(\textrm{intercept}, \textrm{slope}) =
-\textrm{MVN}\left(\boldsymbol 0,
+(\textrm{intercept}, \textrm{slope}) \sim
+\textrm{MVN}
+\left(\boldsymbol 0,
 \left[
 \begin{array}{cc}
 \sigma^2_{\textrm{int}} &amp;
 \sigma_{\textrm{int},\textrm{slope}} \\
 \sigma_{\textrm{int},\textrm{slope}} &amp; 
 \sigma^2_{\textrm{slope}}
+\end{array}
 \right]
 \right)
 \]</span></p>
 <hr />
+</div>
+<div id="section" class="section level2">
+<h2></h2>
 <ul>
 <li>maximal model can get very complicated (e.g. <code>(1+x+y+z+...|g)</code>: <span class="math inline">\(n\)</span> effects require <span class="math inline">\(n(n+1)/2\)</span> variances + covariances</li>
 </ul>
