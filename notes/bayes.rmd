@@ -224,3 +224,8 @@ e.g.
 - Posterior medians (or means)
 - Quantile intervals (`quantile()`)
      - or *highest posterior density* intervals: (`coda::HPDinterval`, `emdbook::HPDregion`)
+
+## Inference on functions of parameters
+
+- e.g. CIs on predictions
+- easy! compute whatever function you want 

@@ -33,6 +33,7 @@ mcmcglmm1 <- MCMCglmm(stmass~mnth*roostsitu,
                       data=dataf,
                       verbose=FALSE)
 ```
+
 We use `verbose=FALSE` to turn off the progress messages, which would be ugly in this document but are generally useful.
 
 - Compare the results (use `summary()`: printing out the a raw `MCMCglmm` model is ugly).

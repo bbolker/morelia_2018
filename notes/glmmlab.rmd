@@ -1,0 +1,30 @@
+---
+title: "Mixed model lab #2 (GLMMs)"
+author: Ben Bolker
+date: "`r format(Sys.time(), '%H:%M %d %B %Y ')`"
+---
+
+```{r}
+library(lme4)
+library(glmmTMB)
+```
+
+```{r}
+load("../data/gopherdat2.RData")
+head(Gdat)
+```
+
+```{r}
+Gdat$obs <- factor(seq(nrow(Gdat)))
+glmer(shells~prev+offset(log(Area))+(1|year)+(1|Site),
+      family=poisson,data=Gdat)
+glmer(shells~prev+offset(log(Area))+year+(1|Site),
+      family=poisson,data=Gdat)
+
+glmer(shells~prev+offset(log(Area))+year+Site+
+          (1|obs),
+      family=poisson,data=Gdat)
+glmmTMB(shells~prev+offset(log(Area))+year+Site+
+          (1|obs),
+      family=poisson,data=Gdat)
+```

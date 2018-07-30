@@ -198,13 +198,25 @@ plot(lmer2,roostsitu~resid(.))
 
 Might be easier with `augment`:
 
-```{r diagbox_gg}
+```{r diagbox_gg,fig.keep="none"}
+aa <- augment(lmer2)
+ggplot(aa,aes(roostsitu,.resid))+
+    geom_boxplot()+coord_flip()
 ```
 
 Plot random effects to look for outliers:
 
 ```{r ranef}
 dotplot(ranef(lmer2,condVar=TRUE))
+```
+
+Or with `tidy` + `ggplot`:
+```{r ranef2}
+tt <- tidy(lmer2,effects="ran_vals")
+ggplot(tt,aes(level,estimate))+
+    geom_pointrange(aes(ymin=estimate-1.96*std.error,
+                        ymax=estimate+1.96*std.error))+
+    coord_flip()
 ```
 
 In general, try plotting residuals and $\sqrt{\textrm{abs}(r)}$ both as a
@@ -219,7 +231,6 @@ function of the fitted values and as a function of particularly important predic
 - Download the file `tundra_agg.rda` (from the data directory given above). The `GS.NEE` records the net ecosystem exchange (in grams of carbon/m^2/year) in a given year and site; `cYear` is a centered version of the year; `n` records the number of observations taken in a given site/year (the NEE value given is an average of these observations).
 - Draw some plots (with `ggplot2` if you can, otherwise with base R graphics) to inspect the data
 - We are interested in the change in NEE over time (i.e., a random-slopes model). Run an `lmer` fit (note this data set does not have the issue of the starling data set), draw some preliminary conclusions, and inspect the plot diagnostics.
-
 
 ## Inference
 
@@ -414,6 +425,7 @@ KRmodcomp(lmer3,lmer4)
 
 In this case, the Kenward-Roger correction appropriately does nothing different -- we have a classical balanced design and no correction is actually necessary.  But it does give a denominator df and a $p$-value for this lmer model, which is handy ...
 
+**Exercise**: repeat for the tundra data
 
 ## Predictions and plotting
 
@@ -423,17 +435,17 @@ In `lmer`, `predict` has a `re.form` argument that specifies which random effect
 dataf$pred <- predict(lmer2,re.form=NA)  ## population level
 dataf$pred1 <- predict(lmer2) ## individual level
 g0 <- ggplot(dataf,aes(mnth,stmass))+
-  geom_point()+
-  geom_line(aes(group=subject))+
-  facet_grid(.~roostsitu)+
-  zero_margin
+    geom_point()+
+    geom_line(aes(group=subject))+
+    facet_grid(.~roostsitu)+
+    zero_margin
 g0 +   geom_line(colour="gray",aes(y=pred1,group=subject)) +
     geom_line(colour="red",aes(y=pred,group=subject))
 ```
 
 There is so much shrinkage (the among-individual variance is very small) that we can barely see the individual-level predictions (gray lines) behind the population-level predictions (red lines).
 
-Unfortunately computing confidence intervals for the predictions is a little tricky: again, there is some code on the [GLMM faq](http://tinyurl.com/glmmfaq) for this (also see below under `MCMCglmm`).
+Unfortunately computing confidence intervals for the predictions is a little tricky: again, there is some code on the [GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html) for this.
 
 ```{r predplot2}
 ggplot(dataf,aes(mnth,pred1))+

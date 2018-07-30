@@ -5,57 +5,74 @@ bibliography: "../glmm.bib"
 date: "`r format(Sys.time(), '%d %B %Y ')`"
 ---
 
+```{r pkgs,echo=FALSE,message=FALSE}
+library(ggplot2);theme_set(theme_bw())
+library(ggExtra)
+library(broom)
+library(cowplot)
+```
+
 # Model specification
 
 ## Distribution/family
 
 - going to assume Gaussian (Normal) here
 - may need to transform
-- remember we want **conditional** distribution to be Normal, not marginal
+- we care about the **conditional** distribution, not the marginal
 - Box-Cox not implemented: could try `MASS::boxcox()` on residuals
 - brute-force: if it makes sense or *if* residuals look bad, try log/sqrt?
+- bias $\gg$ heteroscedasticity/outliers $\gg$ Normality
+
+---
+
+```{r marg_plot,echo=FALSE,fig.width=10}
+set.seed(101)
+dd <- data.frame(x=runif(300,0,500))
+dd$y <- with(dd,rnorm(300,mean=1+2*x,sd=10))
+lm1 <- lm(y~x,data=dd)
+g1 <- ggMarginal(ggplot(dd,aes(x,y))+geom_point()+
+                 geom_smooth(method="lm")+
+                 ggtitle("marginal"),
+                 margins="y",type="histogram")
+aa <- broom::augment(lm1,data=dd)
+g2 <- ggExtra::ggMarginal(ggplot(aa,aes(x,.resid))+geom_point()+
+                 ggtitle("conditional"),
+                 margins="y",type="histogram")
+cowplot::plot_grid(g1,g2)
+```
 
 ## Look at your data!
 
 - use `table()` to confirm how many observations per level of factor
     - which factors covary?
-    - balanced or not?
+    - balanced?
 - plot the data
 	
-## Random effects: reminder
+## Random effects: reminder [@bolker_glmm_2014]
 
-(from @bolker_glmm_2014) Use random effects if you
-
-- don’t want to test hypotheses about differences between responses at particular levels of
-the grouping variable;
-- do want to quantify the variability among levels of the grouping variable;
-- do want to make predictions about unobserved levels of the grouping variable;
-- do want to combine information across levels of the grouping variable;
-- have variation in information per level (number of samples or noisiness);
-- have levels that are randomly sampled from/representative of a larger population;
-- have a categorical predictor that is a nuisance variable (i.e., it is not of direct interest, but should be controlled for).
-
-See also @Crawley2002; @gelman_analysis_2005
-
-If you have sampled fewer than five levels of the grouping variable, you should strongly consider treating it as a fixed effect even if one or more of the criteria above apply.
-
+- don’t want to test differences across specific groups
+- lots of groups (>5), few observations per group, unbalanced
+- exchangeable groups
 
 ## Formulas
 
-- random effects specified as `(a|g1) + (b|g2) + ...`
-- terms separated by `+` are independent
+- random effects specified with `|` as `(a|g1) + (b|g2) + ...`
 - right-hand side is the *grouping variable* (always categorical, usually a factor)
-- left-hand side is the *varying term* (most often 1)
-http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1 (Livius)
+- left-hand side is the *varying term* (most often 1)s
+- terms separated by `+` are independent
 
-| $β_0 + β_{1}X_{i} + e_{si}$ | n/a (Not a mixed-effects model) |
-| $β_0 + S_{0s} + β_{1}X_{i} + e_{si} $  | `∼ X+(1∣Subject)`  |
-| $β_0 + S_{0s} +  (β_{1} + S_{1s})Xi + e_{si}$ | `~ X+(1 + X∣Subject)`
-| $β_0 + S_{0s} + I_{0i} +  (β_{1} + S_{1s})Xi + e_{si}$ | `∼ X+(1 + X∣Subject)+(1∣Item)`
-| $ β_0 + S_{0s} + I_{0i} + β_{1}X_{i} + e_{si}$  | `∼ X+(1∣Subject)+(1∣Item)` | 
-| As above, but $S_{0s}$, $S_{1s}$ independent | `∼ X+(1∣Subject)+(0 + X∣ Subject)+(1∣Item)` |
-| $β_0 + I_{0i} +  (β_{1} + S_{1s})Xi + e_{si}$ |  `∼ X+(0 + X∣Subject)+(1∣Item)`
+see also: http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1 (Livius)
 
+-----------------------------|---------------------------------
+ $β_0 + β_{1}X_{i} + e_{si}$ | n/a (Not a mixed-effects model) 
+ $β_0 + S_{0s} + β_{1}X_{i} + e_{si} $  | `∼ X+(1∣Subject)`  
+ $β_0 + S_{0s} +  (β_{1} + S_{1s})Xi + e_{si}$ | `~ X+(1 + X∣Subject)`
+ $β_0 + S_{0s} + I_{0i} +  (β_{1} + S_{1s})Xi + e_{si}$ | `∼ X+(1 + X∣Subject)+(1∣Item)`
+ $ β_0 + S_{0s} + I_{0i} + β_{1}X_{i} + e_{si}$  | `∼ X+(1∣Subject)+(1∣Item)` 
+ As above, but $S_{0s}$, $S_{1s}$ independent | `∼ X+(1∣Subject)+(0 + X∣ Subject)+(1∣Item)` 
+ $β_0 + I_{0i} +  (β_{1} + S_{1s})Xi + e_{si}$ |  `∼ X+(0 + X∣Subject)+(1∣Item)`
+ ---------------------------|--------------------------
+ 
 ## Formulas, interactions, nesting etc.
 
 `a*b` = main effects plus interaction, `a:b` = interaction only, `a/b` = `a` + `a:b`
@@ -97,8 +114,17 @@ $$
 
 ---
 
+##
+
 - maximal model can get very complicated (e.g. `(1+x+y+z+...|g)`: $n$ effects require $n(n+1)/2$ variances + covariances
-    - 
+
+## Other FAQs
+
+- Can you have continuous variables as REs?  
+(yes, as *varying terms*, but not as *grouping variables*
+- Can a variable be in the model as both FE and RE?  
+(only in the special case where $x$ is numeric but discrete (e.g. year) and >1 observation per $x$ value;  
+FE describes overall trend, RE describes variation around the trend
 
 ## Simplified versions of models
 
@@ -109,14 +135,48 @@ $$
 	 - `lme4` version **only works properly for continuous predictors**
 	 - `afex::mixed` can do this
 	 - independent model is no longer invariant to shifts/reparameterization
-
-## 
-
+- RE "nested within" FE, e.g. if not enough groups at the top level;
+`y ~ g1 + (1|g1:g2)`	 
+	 
 ## What is a practical model?
+
+- Fits aren't **singular**
+- Zero variances, +/- 1 correlations
+- More subtle for larger models:  
+`all(abs(getME(x,"theta"))>1e-4)`
+
+## Why are fits singular?
+
+```{r singsims,echo=FALSE,fig.width=7,fig.height=4,cache=TRUE}
+simfun <- function(n1=5,n2=5,sd1=1,sd2=1) {
+  d <- expand.grid(f1=factor(seq(n1)),f2=factor(seq(n2)))
+  u1 <- rnorm(n1,sd=sd1)
+  d$y <- rnorm(n1*n2,mean=u1,sd=sd2)
+  d
+}
+require(lme4)
+fitfun <- function(d=simfun()) {
+  sqrt(unlist(VarCorr(lmer(y~(1|f1),data=d))))
+}
+set.seed(101)
+sd_dist1 <- replicate(500,fitfun())
+sd_dist2 <- replicate(500,fitfun(simfun(n1=3)))
+sd_List <- list(n1.5=sd_dist1,n1.3=sd_dist2)
+plotfun <- function(x,trueval) {
+  par(las=1,bty="l")
+  hist(x,breaks=50,col="gray",main="",xlab="est. sd",
+       freq=FALSE)
+}
+par(mfrow=c(1,2))
+invisible(lapply(sd_List,plotfun))
+```
 
 # Inference
 
 ## Likelihood
+
+- probability of data given model
+- for mixed models, includes the integral over the random effects
 
 ## Profiles and intervals
 
@@ -134,13 +194,16 @@ more important for variance parameters than fixed-effect parameters
 
 e.g. Normal vs. $t$
 
-
 ## Fit model
 
 ## Diagnostics: residual scale
 
 Similar to generalized linear models: fitted vs. residual,
 scale-location, Q-Q 
+
+## Posterior predictive simulation
+
+- if there is some value you're interested in that you can compute from your data (e.g. number of zero observations, or total NPP)
 
 ## Inference: fixed effects, Wald
 
@@ -173,4 +236,7 @@ scale-location, Q-Q
 
 ## Inference: CIs on predictions etc.
 
-- 
+```{r eval=FALSE}
+mm <- model.matrix(terms(fitted_model),newdat)
+se_pred <- sqrt(diag(mm %*% tcrossprod(vcov(fitted_model),mm)))
+```
