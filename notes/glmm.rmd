@@ -326,7 +326,7 @@ A method for …
 -   you should always use a random effect no matter how few levels you
 have
 
-## Reasons for random effects (inferential/philosophical) [@bolker_glmm_2014]
+## Reasons for random effects (inferential/philosophical)
 
 - **don't** want to
      - test hypotheses about differences between responses at particular levels of
@@ -337,7 +337,7 @@ the grouping variable;
 - have levels that are randomly sampled from/representative of a larger population (*exchangeable*)
 
 
-## Reasons for random effects (practical) [@bolker_glmm_2014]
+## Reasons for random effects (practical)
 
 - want to combine information across groups
 - have variation in information per level (number of samples or noisiness);
@@ -346,7 +346,7 @@ the grouping variable;
 
 See also @Crawley2002; @gelman_analysis_2005
 
-### Avoiding MM
+## Avoiding MM
 
 * average: for *nested* LMMs (when uninterested in within-group variation) [@murtaugh_simplicity_2007] 
 * use fixed effects (or two-stage models) instead of random effects when (1) samples per block are large (shrinkage will be unimportant) or (2) number of samples is small (you will save few degrees of freedom, and variance estimates are likely to be bad anyway)
@@ -362,8 +362,9 @@ Overview
 -   Best fit is a compromise between two components\
     (consistency of data with fixed effects and conditional modes;
     consistency of random effect with RE distribution)
+	-   Goodness-of-fit *integrates* over conditional modes
 
--   Goodness-of-fit `*integrates*` over conditional modes
+## ...
 
 ```{r plotex,message=FALSE}
 set.seed(101)
@@ -381,7 +382,7 @@ ggplot(dd,aes(x=f,y=y))+geom_point()+
 
 ## Shrinkage: *Arabidopsis* conditional modes
 
-```{r arabshrink,fig.height=8,fig.width=8}
+```{r arabshrink,fig.height=6,fig.width=8}
 z<- subset(dat.tf,amd=="clipped" & nutrient=="1")
 m1 <- glm(total.fruits~gen-1,data=z,family="poisson")
 m2 <- glmer(total.fruits~1+(1|gen),data=z,family="poisson")
@@ -537,9 +538,7 @@ approximation for GLM(M)s
 ## Bayesian inference
 
 -   If we have a good sample from the posterior distribution (Markov chains have converged etc. etc.) we get most of the inferences we want for free by summarizing the marginal posteriors
--   `*post hoc*` Bayesian methods: use deterministic/frequentist methods to find the maximum, then sample around it
-
-## *Culcita* confidence intervals
+-   *post hoc* Bayesian methods: use deterministic/frequentist methods to find the maximum, then sample around it
 
 # Challenges & open questions
 
@@ -566,7 +565,7 @@ approximation for GLM(M)s
 -   Stata (GLLAMM, xtmelogit)
 -   HLM, MLWiN
 
-![image](pix/300px-On_Beyond_Zebra.jpg){width="4cm"}
+![image](pix/300px-On_Beyond_Zebra.jpg){width="3cm"}
 
 ## Challenges
 
