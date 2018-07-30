@@ -147,7 +147,7 @@ FE describes overall trend, RE describes variation around the trend
 
 ## Why are fits singular?
 
-```{r singsims,echo=FALSE,fig.width=7,fig.height=4,cache=TRUE}
+```{r singsims,echo=FALSE,fig.width=7,fig.height=4,cache=TRUE,message=FALSE}
 simfun <- function(n1=5,n2=5,sd1=1,sd2=1) {
   d <- expand.grid(f1=factor(seq(n1)),f2=factor(seq(n2)))
   u1 <- rnorm(n1,sd=sd1)
@@ -162,13 +162,15 @@ set.seed(101)
 sd_dist1 <- replicate(500,fitfun())
 sd_dist2 <- replicate(500,fitfun(simfun(n1=3)))
 sd_List <- list(n1.5=sd_dist1,n1.3=sd_dist2)
-plotfun <- function(x,trueval) {
+plotfun <- function(x,trueval,main="") {
   par(las=1,bty="l")
-  hist(x,breaks=50,col="gray",main="",xlab="est. sd",
+  hist(x,breaks=50,col="gray",main=main,xlab="est. sd",
        freq=FALSE)
 }
 par(mfrow=c(1,2))
-invisible(lapply(sd_List,plotfun))
+plotfun(sd_List[[1]],main="sd=1,res.sd=1,5 groups")
+plotfun(sd_List[[2]],main="sd=1,res.sd=1,3 groups")
+dev.off()
 ```
 
 # Inference

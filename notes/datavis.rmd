@@ -14,45 +14,13 @@ Please share \& remix noncommercially, mentioning its origin.
 ```{r setup, echo=FALSE,message=FALSE}
 library(knitr)
 opts_knit$set(fig.align="center",fig.width=7,fig.height=5,
-               out.width="0.7\\textwidth",tidy=FALSE,use.highlight=TRUE)
+              out.width="0.7\\textwidth",tidy=FALSE,use.highlight=TRUE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
                        par(bty="l",las=1)
                    } else { }
                })
-library("ggplot2"); theme_set(theme_bw())
 ``` 
-
-## Goals/contexts of data visualization
-
-**Exploration**
-
-* want *nonparametric*/*robust* approaches: impose as few assumptions as possible
- * boxplots instead of mean/standard deviation (generally base locations on medians rather than means)
- * loess/GAM instead of linear/polynomial regression
-* need *speed*: quick and dirty
-* canned routines for standard tasks, flexibility for non-standard tasks
-* manipulation in the context of visualization: need to summarize on the fly
-
-**Diagnostics**
-
-* attempt to determine fitting problems graphically: looking for absence of patterns in residuals
-* e.g. scale-location plot, Q-Q plot; `plot.lm`
-* plot methods: generic (e.g. residuals vs fitted) vs specific (e.g. residuals vs predictors)
-* plotting predictions (intuitive) vs plotting residuals (amplifies/zooms in on discrepancies)
-* plotting unmodeled characteristics (e.g. spatial, temporal autocorrelation): much easier to draw a picture than fit a model
-* code contrasts for visual simplicity (e.g. deviations from linearity: Q-Q plots, signed square-root profiles)
-
-
-**Presentation**
-
-* how closely should one match analyses with graphs?  "Let the data speak for themselves" vs "Tell a story"
-* display data (e.g. boxplots, standard deviations) or inferences from data (confidence intervals)
-* superimposing model fits (`geom_smooth`)
-* don't be too clever/cram too much in
-* coefficient plots vs parameter tables [@gelman_lets_2002]
-* tradeoff between visual design (tweaking) and reproducibility: learning programmatic methods may pay off in the long run (see e.g. `directlabels`, `ggrepel` packages)
-* order factors sensibly (i.e *not* alphabetical or numerical unless (1) the labels have some intrinsic meaning or (2) you expect that readers will be interested in looking up particular levels in the plot).  "what's so special about Alabama?" (Aguascalientes, Alberta ...)
 
 ## Basic criteria for data presentation
 
@@ -68,18 +36,6 @@ Visual perception of quantitative information: [Cleveland hierarchy](http://proc
 * **medium** boxplots, loess, histograms, GAM (or linear regression)
 * **large** modern nonparametrics: violin plots, hexbin plots, kernel densities: computational burden, and display overlapping problems, relevant
 * combinations or overlays where appropriate (beanplot)
-
-## Rules of thumb
-
-* (Continuous) response on the $y$-axis, most salient (continuous) predictor on the $x$-axis
-* Put most salient comparisons within the same subplot (distinguished by color/shape), and nearby within the subplot when grouping bars/points
-* Facet rows > facet columns
-* Use transparency to include important but potentially distracting detail
-* Do category levels need to be *identified* or just *distinguished*?
-* Order categorical variables meaningfully
-* Choose *population variation* (standard deviations, boxplots) vs. *estimate variation* (standard errors, mean $\pm$ 2 SE, boxplot notches)
-* Try to match graphics to statistical analysis, but not at all costs
-* Choose colors carefully (`RColorBrewer`/[ColorBrewer](colorbrewer2.org/), [IWantHue](http://tools.medialab.sciences-po.fr/iwanthue/)): respect dichromats and B&W printouts
 
 ## Techniques for multilevel data
 
@@ -99,60 +55,6 @@ geom_smooth(aes(colour=herd,weight=size),
             se=FALSE)
 ```
 (ignore `glm.fit` warnings if you try this)
-
-
-
-
-## Challenges
-
-## high-dimensional data (esp continuous)
-
-Possible solutions:
-
-- use color, shape for discrete predictor variables (up to ~10 categories); text plots
-- small multiples, conditioning plots (shingles/facets); i.e. discretize continuous plots
-- contour plots (worse)
-- perspective plots (worst?)
-
-##  large data sets
-
-- problems with computation, file size, presentation
-- file size: raster (PNG) instead of vector (PS/PDF), `pch="."`
-- overplotting (alpha), kernel density estimation, hexagonal binning
-- summarize (quantiles, kernel densities, etc.)
-
-## discrete data
-
-- lots of point overlap; jittering OK for exploratory analysis but ugly.  Need to summarize/bin appropriately (`stat_sum`); beeswarm plots
-
-## spatial data
-
-- the best parts of the Cleveland hierarchy ($x$ and $y$ axes) are already taken, usually have to resort to color/size/pie charts. Representing uncertainty is a big challenge, usually must be done separately (transparency/saturation?)
-
-## compositional data
-
-- would like to display "sum to 1.0" constraint but also allow accurate comparison of magnitudes: stacked bars vs grouped bars (or dotplots)?
-- harder if also need to represent uncertainty (would like to show correlations among components)
-- *ternary diagrams*: nice but don't generalize past 3 elements
-
-## multilevel data
-
-- often hard (or messy) to represent all levels of variation
-
-## next generation tools 
-
-- dynamic/exploratory graphics: [ggobi](http://www.ggobi.org), [Mondrian](http://rosuda.org/mondrian/Mondrian.html), [latticist] (http://code.google.com/p/latticist), JMP, [Shiny](http://www.rstudio.com/shiny/), [Gapminder](http://www.gapminder.org/), [googleVis](http://code.google.com/p/google-motion-charts-with-r/), [rCharts](http://rcharts.io/), [ggviz](https://github.com/rstudio/ggvis) (next-generation/interactive `ggplot2`)
-- GUI frameworks: JMP, [R Commander](http://socserv.mcmaster.ca/jfox/Misc/Rcmdr/), [Deducer](cran.r-project.org/web/packages/Deducer/index.html), [Rattle](rattle.togaware.com/), [web interface to ggplot2](http://www.yeroon.net/ggplot2/), Shiny
-- presentation technologies: [JCGS editorial](http://pubs.amstat.org/doi/pdfplus/10.1198/jcgs.2010.191ed) with
-[supplementary materials](http://pubs.amstat.org/doi/suppl/10.1198/jcgs.2010.191ed)
-- computational frameworks: `lattice`, `ggplot`, [http://d3js.org/](http://vis.stanford.edu/protovis/), `ggviz`
-
-## Graphics culture 
-
-- the gods: Cleveland (hierarchy), Tufte [@tufte_visual_2001;@tufte_envisioning_1995;@tufte_visual_1997;@tufte_beautiful_2006] ("chartjunk", minimizing non-data-ink, sparklines), Tukey
-- the demi-gods: Wilkinson (Grammar of Graphics) [@Wilkinson1999], Wickham (ggplot *et al*) [@wickham_ggplot2_2009], [Stephen Few](http://www.perceptualedge.com/), Kaiser Fung ([Junk Charts](http://junkcharts.typepad.com/junk_charts/))
-- dionysians (infovis) vs. apollonians (statistical graphics) [@gelman_infovis_2013]
-- graphics pedants: [dynamite plots](http://emdbolker.wikidot.com/blog:dynamite), pie charts (esp. 3D), dual-axis figures ...
 
 ## Data visualization in R
 
@@ -184,6 +86,12 @@ See [Karthik Ram's ggplot intro](https://github.com/karthikram/ggplot-lecture) o
 
 # Example/exercise
 
+```{r pkgs}
+library("ggplot2"); theme_set(theme_bw())
+library(ggalt)
+source("../R/geom_cstar.R")
+```
+
 ## cbpp data set
 Contagious bovine pleuropneumonia (CBPP): from @lesnoff_within-herd_2004, via the `lme4` package. See `?lme4::cbpp` for details.
 
@@ -196,24 +104,24 @@ g0 <- ggplot(cbpp2,aes(period,incidence/size))
 
 ### spaghetti plot
 
-```{r spaghetti}
+```{r spaghetti,fig.keep="none"}
 g1 <- g0+geom_line(aes(colour=herd))+geom_point(aes(size=size,colour=herd))
 ```
 
 Do we need the colours?
-```{r}
+```{r nocol,fig.keep="none"}
 g2 <- g0+geom_line(aes(group=herd))+geom_point(aes(size=size,group=herd))
 ```
 
 Facet instead:
 
-```{r}
+```{r facet,fig.keep="none"}
 g4 <- g1+facet_wrap(~herd)
 ```
 
-Order by average prop. incidence, using the `+` trick:
+Order by average prop. incidence, using the `%+%` trick:
 
-```{r}
+```{r facet_order,fig.keep="none"}
 cbpp2R <- transform(cbpp2,herd=reorder(herd,incidence/size))
 g4 %+% cbpp2R
 ```
@@ -224,17 +132,25 @@ Gopher tortoise data (from @ozgul_upper_2009, see [ecostats chapter](http://bbol
 
 Plot density of shells from freshly dead tortoises (`shells/Area`) as a function of mycoplasmal prevalence (%, `prev`): you may want to consider site, year of collection, or population density as well.
 
-```{r}
+```{r gopher1, fig.keep="none"}
 load("../data/gopherdat2.RData")
 g5 <- ggplot(Gdat,aes(prev,shells/Area))+geom_point()
 ```
 
-```{r}
-library(ggalt)
-source("../R/geom_cstar.R")
+```{r encircle,fig.keep="none"}
 g5+geom_encircle(aes(group=Site))
 g5+stat_centseg(aes(group=Site),cfun=mean)
 ```
+
+## clipping data
+
+Data from
+
+```{r}
+load("../data/Banta.RData")
+dat.tf$jltf <- jitter(log(dat.tf$total.fruits+1),amount=0.05)
+ggplot(
+
 
 ```{r sessioninfo}
 sessionInfo()
