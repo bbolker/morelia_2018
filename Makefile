@@ -8,11 +8,17 @@ nnslides := notes/glmm.slides.html #$(notes:%=notes/%.slides.html)
 
 Datasets += aids.csv  Banta.RData  gopherdat2.csv culcitalogreg.csv gopherdat2.RData starling.RData culcita.RData gophertortoise.txt toenail.csv dufemalepers.csv tundra.csv Elston2001_tickdata.txt lizards.csv tundra_agg.rda
 
-dd := $(Datasets:%=data/%)
+Rfiles += monday.R geom_cstar.R calcDenDF.R
 
-all: glmm_data.zip setup.html syllabus.html schedule.html ${nnhtml} ${nnrmd} ${nnslides}
+dd := $(Datasets:%=data/%)
+rr := $(Rfiles:%=R/%)
+
+all: glmm_data.zip setup.html syllabus.html schedule.html ${nnhtml} ${nnrmd} ${nnslides} ${rr}
 
 notes/%.rmd:  ${SRCDIR}/notes/%.[Rr]md
+	cp $< $@
+
+R/%.R:  ${SRCDIR}/R/%.R
 	cp $< $@
 
 %.html: ${SRCDIR}/%.[Rr]md

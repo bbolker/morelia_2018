@@ -1,0 +1,96 @@
+---
+title: "Generalized linear mixed models in R: nitty-gritty"
+author: Ben Bolker
+bibliography: "../glmm.bib"
+date: "`r format(Sys.time(), '%d %B %Y ')`"
+---
+
+```{r pkgs,message=FALSE}
+library(lme4)
+library(broom)
+library(broom.mixed)
+library(dotwhisker)
+```
+        
+## Overview
+
+Most aspects of GLMMs are carried over from LMMs (random effects) and GLMs (families and links).
+
+## integration methods
+
+- penalized quasi-likelihood
+    - fastest/least accurate
+	- uses quasi-likelihood (no AIC etc.?)
+- Laplace approximation
+    - fast, flexible compromise
+- adaptive Gauss-Hermite quadrature
+    - slowest
+    - most accurate
+    - most limited
+
+## integration rules
+
+- it only really matters in relatively extreme cases (small numbers of binary obs per group)
+- use the most accurate method that's available and feasible
+
+## Laplace-approximation diagnostics
+
+```{r lapl,fig.width=6,fig.height=5}
+library(lattice)
+aspect <- 0.6
+xlab <- "z"; ylab <- "density"; type <- c("g","l"); scaled <- FALSE
+mm <- readRDS("../data/toenail_lapldiag.rds")
+print(xyplot(y ~ zvals|id, data=mm,
+             type=type, aspect=aspect,
+             xlab=xlab,ylab=ylab,
+             as.table=TRUE,
+             panel=function(x,y,...){
+    if (!scaled) {
+        panel.lines(x, dnorm(x), lty=2)
+    } else {
+        panel.abline(h=1, lty=2)
+    }
+    panel.xyplot(x,y,...)
+}))
+```
+
+## comparing integration methods
+
+```{r compare}
+g1 <- glmer(incidence/size ~ period + (1|herd),
+            family=binomial,
+            data=cbpp,
+            weights=size)
+g2 <- update(g1,nAGQ=5)
+g3 <- update(g1,nAGQ=10)
+g4 <- MASS:::glmmPQL(incidence/size ~ period,
+                     random = ~1|herd,
+                     data=cbpp,
+                     family=binomial,
+                     weights=size)
+dwplot(list(Laplace=g1,AGQ5=g2,AGQ10=g3,glmmPQL=g4))
+```      
+      
+## overdispersion
+
+- reminder: "too much" variance
+- only applies to families with *estimated* variance:  
+e.g. Poisson, binomial ($N>1$)
+
+## dealing with overdispersion
+
+- quasi-likelihood
+- observation-level random effects [@elston_analysis_2001]
+- overdispersed distributions  
+(negative binomial, beta-binomial, etc.)  
+`glmmTMB`/`brms` [@brooks_modeling_2017]
+
+## other diagnostics
+
+- assumption of Normal residuals may not be very good
+- simulated residuals (`DHARMa`)
+
+## zero-inflation
+
+## Complete separation
+

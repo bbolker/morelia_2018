@@ -14,7 +14,7 @@ Please share \& remix noncommercially, mentioning its origin.
 ```{r setup, echo=FALSE,message=FALSE}
 library(knitr)
 opts_knit$set(fig.align="center",fig.width=7,fig.height=5,
-              out.width="0.7\\textwidth",tidy=FALSE,use.highlight=TRUE)
+               out.width="0.7\\textwidth",tidy=FALSE,use.highlight=TRUE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
                        par(bty="l",las=1)
@@ -24,18 +24,11 @@ knit_hooks$set(basefig=function(before, options, envir) {
 
 ## Basic criteria for data presentation
 
-Much of what I have to say here is also said very nicely by @rauser_how_2016
+Keynote talk by @rauser_how_2016 is **strongly** recommended.
 
 Visual perception of quantitative information: [Cleveland hierarchy](http://processtrends.com/toc_data_visualization.htm) [@cleveland_graphical_1984,@cleveland_graphical_1987,@cleveland_visualizing_1993]
 
 ![cleveland](pix/data_vis_1.png)
-
-**Data presentation scales with data size**
-
-* **small** show all points, possibly dodged/jittered, with some summary statistics: dotplot, beeswarm. Simple trends (linear/GLM)
-* **medium** boxplots, loess, histograms, GAM (or linear regression)
-* **large** modern nonparametrics: violin plots, hexbin plots, kernel densities: computational burden, and display overlapping problems, relevant
-* combinations or overlays where appropriate (beanplot)
 
 ## Techniques for multilevel data
 
@@ -56,14 +49,6 @@ geom_smooth(aes(colour=herd,weight=size),
 ```
 (ignore `glm.fit` warnings if you try this)
 
-## Data visualization in R
-
-## Base graphics 
-
-- simple 'canvas' approach
-- straightforward, easy to customize
-- most plot methods written in base graphics
-
 ## ggplot 
 
 - newest
@@ -75,7 +60,7 @@ geom_smooth(aes(colour=herd,weight=size),
 - easier to overlay multiple data sets, data summaries, model predictions etc.
 - no 3D plots (although see the [gg3D package](https://github.com/AckerDWM/gg3D))
 - rendering can be slow
-- `gridExtra`, `ggExtra`, `cowplot`, `directlabels` packages may be handy
+- `ggalt`, `gridExtra`, `ggExtra`, `cowplot`, `directlabels` packages useful
 - [ggplot gallery](http://www.ggplot2-exts.org/gallery/)
 
 ## ggplot intro
@@ -86,7 +71,7 @@ See [Karthik Ram's ggplot intro](https://github.com/karthikram/ggplot-lecture) o
 
 # Example/exercise
 
-```{r pkgs}
+```{r pkgs,message=FALSE}
 library("ggplot2"); theme_set(theme_bw())
 library(ggalt)
 source("../R/geom_cstar.R")
@@ -121,7 +106,7 @@ g4 <- g1+facet_wrap(~herd)
 
 Order by average prop. incidence, using the `%+%` trick:
 
-```{r facet_order,fig.keep="none"}
+```{r order,fig.keep="none"}
 cbpp2R <- transform(cbpp2,herd=reorder(herd,incidence/size))
 g4 %+% cbpp2R
 ```
@@ -132,12 +117,12 @@ Gopher tortoise data (from @ozgul_upper_2009, see [ecostats chapter](http://bbol
 
 Plot density of shells from freshly dead tortoises (`shells/Area`) as a function of mycoplasmal prevalence (%, `prev`): you may want to consider site, year of collection, or population density as well.
 
-```{r gopher1, fig.keep="none"}
+```{r gopher1,fig.keep="none"}
 load("../data/gopherdat2.RData")
 g5 <- ggplot(Gdat,aes(prev,shells/Area))+geom_point()
 ```
 
-```{r encircle,fig.keep="none"}
+```{r gopher2,fig.keep="none"}
 g5+geom_encircle(aes(group=Site))
 g5+stat_centseg(aes(group=Site),cfun=mean)
 ```
@@ -146,11 +131,14 @@ g5+stat_centseg(aes(group=Site),cfun=mean)
 
 Data from
 
-```{r}
+```{r banta1,fig.keep="none"}
 load("../data/Banta.RData")
-dat.tf$jltf <- jitter(log(dat.tf$total.fruits+1),amount=0.05)
-ggplot(
-
+dat.tf$ltf1 <- log(dat.tf$total.fruits+1)
+ggplot(dat.tf,aes(nutrient,ltf1))+geom_point()+
+    facet_wrap(~amd)
+## calc mean by group
+aggdat <- aggregate(ltf1~popu+gen+amd+nutrient,FUN=mean,data=dat.tf)
+```
 
 ```{r sessioninfo}
 sessionInfo()
