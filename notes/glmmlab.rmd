@@ -9,12 +9,16 @@ library(lme4)
 library(glmmTMB)
 ```
 
+## CBPP data
+
 ```{r}
 data("cbpp",package="lme4")
 glmer(incidence/size~period+(1|herd),
       data=cbpp,
       family=binomial)
 ```
+
+## gopher tortoise data
 
 ```{r}
 load("../data/gopherdat2.RData")

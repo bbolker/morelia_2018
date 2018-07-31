@@ -11,6 +11,9 @@ library(ggExtra)
 library(broom)
 library(cowplot)
 library(pander)
+library(lme4)
+library(broom)
+library(broom.mixed)
 ```
 
 # Model specification
@@ -62,8 +65,6 @@ cowplot::plot_grid(g1,g2)
 - left-hand side is the *varying term* (most often 1)s
 - terms separated by `+` are independent
 
-see also: http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1 (Livius)
-
 ```{r ftab,echo=FALSE,results="asis"}
 ftab <- matrix(c("β_0 + β_{1}X_{i} + e_{si}",
                  "n/a (Not a mixed-effects model)",
@@ -88,6 +89,8 @@ ff <- !grepl("n/a",ftab$formula)
 ftab$formula[ff] <- sprintf("`%s`",ftab$formula[ff])
 pander::pander(ftab,justify="left")
 ```
+
+Modified from: http://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet?lq=1 (Livius)
 
 ## Formulas, interactions, nesting etc.
 
@@ -206,7 +209,7 @@ $\rho$ must be >0)
 
 ## Why are fits singular?
 
-Essentially, because the *observed* among-group variation is less than the *expected* among-group variation (= $\sigma^2_{\mbox{among}} + \sigma^2_{\mbox{within}}/n$)
+Essentially, because the *observed* among-group variation is less than the *expected* among-group variation (= $\sigma^2_{\mbox{among}} + \sigma^2_{\mbox{within}}/n$). More generally, because *some* dimension of the variance-covariance matrix has zero extent ...
 
 ```{r singsims,echo=FALSE,fig.width=7,fig.height=4,cache=TRUE,message=FALSE}
 simfun <- function(n1=5,n2=5,sd1=1,sd2=1) {
@@ -259,10 +262,36 @@ e.g. Normal vs. $t$
 
 ## Fit model
 
+```{r ss}
+m1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+```
+
 ## Diagnostics: residual scale
 
 Similar to generalized linear models: fitted vs. residual,
 scale-location, Q-Q 
+
+```{r diag0,results="hide",fig.keep="none"}
+aa <- augment(m1)
+## fitted vs resid
+plot(m1,type=c("p","smooth"))
+## scale-location
+plot(m1,sqrt(abs(resid(.)))~fitted(.),type=c("p","smooth"))
+## q-q
+lattice::qqmath(m1,id=0.05)
+```
+
+Or with `augment` and ggplot ...
+
+```{r diag,results="hide",fig.keep="none"}
+aa <- augment(m1)
+## fitted vs resid
+ggplot(aa,aes(.fitted,.resid))+geom_point()+geom_smooth()
+## scale-location
+ggplot(aa,aes(.fitted,sqrt(abs(.resid))))+geom_point()+geom_smooth()
+## q-q
+ggplot(aa)+stat_qq(aes(sample=.resid))
+```
 
 ## Posterior predictive simulation
 
@@ -274,10 +303,23 @@ scale-location, Q-Q
 - termwise tests: `car::Anova`, `afex::anova`
 - contrasts/effects/post-hoc tests: `emmeans`, `effects` packages
 
+```{r anova,results="hide"}
+car::Anova(m1)
+```
+
 ## Degrees of freedom
 
 - level-counting: `R/calcDenDF.R`
 - `lmerTest`/`afex`; Satterthwaite, Kenward-Roger
+
+```{r}
+library(lmerTest)
+summary(as_lmerModLmerTest(m1))
+summary(as_lmerModLmerTest(m1),ddf="Kenward-Roger")
+```
+
+Q: Why not use `lmerTest` all the time?  
+A: it can make it a little harder to diagnose fitting problems
 
 ## Inference: fixed effects, likelihood ratio test
 
@@ -285,7 +327,21 @@ scale-location, Q-Q
 - fit pairwise models and use `anova()` to compare
 - `drop1`, `afex::anova()`
 
+```{r ci, cache=TRUE}
+confint(m1)
+```
+
+What took so long?
+
+```{r prof,cache=TRUE,echo=FALSE}
+pp <- as.data.frame(profile(m1,signames=FALSE))
+ggplot(pp,aes(.focal,.zeta^2))+geom_point()+geom_line()+
+    facet_wrap(~.par,scale="free_x")
+```
+
 ## Inference: parametric bootstrap
+
+Very slow!
 
 - `pbkrtest`
 - `confint(.,method="boot")`
