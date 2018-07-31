@@ -10,9 +10,11 @@ date: "`r format(Sys.time(), '%d %B %Y ')`"
 - I would generally recommend finding standardized effect sizes by scaling continuous predictors by their standard deviation as recommended by @schielzeth_simple_2010 (or by 2SD as suggested by @gelman_scaling_2008)
 - R-squared measures:
 - overall metric like $\eta^2$:
+
 > Unfortunately this is currently not possible.
-I believe that most of these problems are also discussed in a recent Psych Methods paper [@rights_quantifying_2018] ... The fact that calculating a global measure of model fit (such as R2) is already riddled with complications and that no simple single number can be found, should be a hint that doing so for a subset of the model parameters (i.e., main-effects or interactions) is even more difficult. Given this, I would not recommend to try finding a measure of standardized effect sizes for mixed models. [@singmann_compute_2018]
-- see 
+>I believe that most of these problems are also discussed in a recent Psych Methods paper [@rights_quantifying_2018] ... The fact that calculating a global measure of model fit (such as R2) is already riddled with complications and that no simple single number can be found, should be a hint that doing so for a subset of the model parameters (i.e., main-effects or interactions) is even more difficult. Given this, I would not recommend to try finding a measure of standardized effect sizes for mixed models. [@singmann_compute_2018]
+
+- see the relevant section of the [glmm FAQ](http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#how-do-i-compute-a-coefficient-of-determination-r2-or-an-analogue-for-glmms) for packages etc. ...
 
 ## Temporal correlation
 
