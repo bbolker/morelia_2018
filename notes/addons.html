@@ -134,8 +134,13 @@ $(document).ready(function () {
 <ul>
 <li>I would generally recommend finding standardized effect sizes by scaling continuous predictors by their standard deviation as recommended by <span class="citation">Schielzeth (2010)</span> (or by 2SD as suggested by <span class="citation">Gelman (2008)</span>)</li>
 <li>R-squared measures:</li>
-<li>overall metric like <span class="math inline">\(\eta^2\)</span>: &gt; Unfortunately this is currently not possible. I believe that most of these problems are also discussed in a recent Psych Methods paper <span class="citation">(Rights and Sterba 2018)</span> … The fact that calculating a global measure of model fit (such as R2) is already riddled with complications and that no simple single number can be found, should be a hint that doing so for a subset of the model parameters (i.e., main-effects or interactions) is even more difficult. Given this, I would not recommend to try finding a measure of standardized effect sizes for mixed models. <span class="citation">(Singmann 2018)</span></li>
-<li>see</li>
+<li>overall metric like <span class="math inline">\(\eta^2\)</span>:</li>
+</ul>
+<blockquote>
+<p>Unfortunately this is currently not possible. I believe that most of these problems are also discussed in a recent Psych Methods paper <span class="citation">(Rights and Sterba 2018)</span> … The fact that calculating a global measure of model fit (such as R2) is already riddled with complications and that no simple single number can be found, should be a hint that doing so for a subset of the model parameters (i.e., main-effects or interactions) is even more difficult. Given this, I would not recommend to try finding a measure of standardized effect sizes for mixed models. <span class="citation">(Singmann 2018)</span></p>
+</blockquote>
+<ul>
+<li>see the relevant section of the <a href="http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#how-do-i-compute-a-coefficient-of-determination-r2-or-an-analogue-for-glmms">glmm FAQ</a> for packages etc. …</li>
 </ul>
 </div>
 <div id="temporal-correlation" class="section level2">
