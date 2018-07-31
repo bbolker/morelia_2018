@@ -123,7 +123,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Mixed model lab #2 (GLMMs)</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>20:45 30 July 2018</em></h4>
+<h4 class="date"><em>08:27 31 July 2018</em></h4>
 
 </div>
 
@@ -136,29 +136,23 @@ $(document).ready(function () {
 <pre class="r"><code>data(&quot;cbpp&quot;,package=&quot;lme4&quot;)
 glmer(incidence/size~period+(1|herd),
       data=cbpp,
+      weights=size,
       family=binomial)</code></pre>
-<pre><code>## Warning in eval(family$initialize, rho): non-integer #successes in a
-## binomial glm!</code></pre>
-<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
-## $checkConv, : unable to evaluate scaled gradient</code></pre>
-<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
-## $checkConv, : Hessian is numerically singular: parameters are not uniquely
-## determined</code></pre>
 <pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
 ##  Family: binomial  ( logit )
 ## Formula: incidence/size ~ period + (1 | herd)
 ##    Data: cbpp
+## Weights: size
 ##      AIC      BIC   logLik deviance df.resid 
-##  17.3479  27.4747  -3.6740   7.3479       51 
+## 194.0531 204.1799 -92.0266 184.0531       51 
 ## Random effects:
-##  Groups Name        Std.Dev. 
-##  herd   (Intercept) 8.277e-10
+##  Groups Name        Std.Dev.
+##  herd   (Intercept) 0.6421  
 ## Number of obs: 56, groups:  herd, 15
 ## Fixed Effects:
 ## (Intercept)      period2      period3      period4  
-##      -2.639      -62.738      -34.432     -330.094  
-## convergence code 0; 2 optimizer warnings; 0 lme4 warnings</code></pre>
+##     -1.3983      -0.9919      -1.1282      -1.5797</code></pre>
 </div>
 <div id="gopher-tortoise-data" class="section level2">
 <h2>gopher tortoise data</h2>

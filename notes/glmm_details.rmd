@@ -82,6 +82,7 @@ dwplot(list(Laplace=g1,AGQ5=g2,AGQ10=g3,glmmPQL=g4))
 e.g. Poisson, binomial ($N>1$)
 - sum^2 of Pearson residuals / residual degrees of freedom
 - e.g. `aods3::gof()`
+- observation-level random effects
 
 ## dealing with overdispersion
 

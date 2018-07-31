@@ -147,6 +147,43 @@ A: yes, as *varying terms*, but not as *grouping variables*
 A: only in the special case where $x$ is numeric but discrete (e.g. year) and >1 observation per $x$ value;  
 FE describes overall trend, RE describes variation around the trend
 
+## What is a practical model?
+
+- Fits aren't **singular**
+- singular = zero variances, +/- 1 correlations
+- More subtle for larger models:  
+`all(abs(getME(x,"theta"))>1e-4)`
+
+## Why are fits singular?
+
+Essentially, because the *observed* among-group variation is less than the *expected* among-group variation (= $\sigma^2_{\mbox{among}} + \sigma^2_{\mbox{within}}/n$). More generally, because *some* dimension of the variance-covariance matrix has zero extent ...
+
+```{r singsims,echo=FALSE,fig.width=7,fig.height=4,cache=TRUE,message=FALSE}
+simfun <- function(n1=5,n2=5,sd1=1,sd2=1) {
+  d <- expand.grid(f1=factor(seq(n1)),f2=factor(seq(n2)))
+  u1 <- rnorm(n1,sd=sd1)
+  d$y <- rnorm(n1*n2,mean=u1,sd=sd2)
+  d
+}
+require(lme4)
+fitfun <- function(d=simfun()) {
+  sqrt(unlist(VarCorr(lmer(y~(1|f1),data=d))))
+}
+set.seed(101)
+sd_dist1 <- replicate(500,fitfun())
+sd_dist2 <- replicate(500,fitfun(simfun(n1=3)))
+sd_List <- list(n1.5=sd_dist1,n1.3=sd_dist2)
+plotfun <- function(x,trueval,main="") {
+  par(las=1,bty="l")
+  hist(x,breaks=50,col="gray",main=main,xlab="est. sd",
+       freq=FALSE)
+}
+par(mfrow=c(1,2))
+plotfun(sd_List[[1]],main="sd=1,res.sd=1,5 groups")
+plotfun(sd_List[[2]],main="sd=1,res.sd=1,3 groups")
+invisible(dev.off())
+```
+
 ## Simplified versions of models
 
 - `(1|b/a)` ([positive] compound symmetry) vs. `(a|b)`:
@@ -200,66 +237,13 @@ $\rho$ must be >0)
 	 - $n$ instead of $n(n+1)/2$ parameters
 - RE "nested within" FE, e.g. if not enough groups at the top level;
 `y ~ g1 + (1|g1:g2)`; *more* parameters but fixed rather than random
-	 
-## What is a practical model?
 
-- Fits aren't **singular**
-- singular = zero variances, +/- 1 correlations
-- More subtle for larger models:  
-`all(abs(getME(x,"theta"))>1e-4)`
+## Restricted maximum likelihood (REML)
 
-## Why are fits singular?
-
-Essentially, because the *observed* among-group variation is less than the *expected* among-group variation (= $\sigma^2_{\mbox{among}} + \sigma^2_{\mbox{within}}/n$). More generally, because *some* dimension of the variance-covariance matrix has zero extent ...
-
-```{r singsims,echo=FALSE,fig.width=7,fig.height=4,cache=TRUE,message=FALSE}
-simfun <- function(n1=5,n2=5,sd1=1,sd2=1) {
-  d <- expand.grid(f1=factor(seq(n1)),f2=factor(seq(n2)))
-  u1 <- rnorm(n1,sd=sd1)
-  d$y <- rnorm(n1*n2,mean=u1,sd=sd2)
-  d
-}
-require(lme4)
-fitfun <- function(d=simfun()) {
-  sqrt(unlist(VarCorr(lmer(y~(1|f1),data=d))))
-}
-set.seed(101)
-sd_dist1 <- replicate(500,fitfun())
-sd_dist2 <- replicate(500,fitfun(simfun(n1=3)))
-sd_List <- list(n1.5=sd_dist1,n1.3=sd_dist2)
-plotfun <- function(x,trueval,main="") {
-  par(las=1,bty="l")
-  hist(x,breaks=50,col="gray",main=main,xlab="est. sd",
-       freq=FALSE)
-}
-par(mfrow=c(1,2))
-plotfun(sd_List[[1]],main="sd=1,res.sd=1,5 groups")
-plotfun(sd_List[[2]],main="sd=1,res.sd=1,3 groups")
-invisible(dev.off())
-```
-
-# Inference
-
-## Likelihood
-
-- probability of data given model
-- for mixed models, includes the integral over the random effects
-
-## Profiles and intervals
-
-## Wald approximation
-
-most important:
-
-- small sample sizes
-- values near boundaries
-     - changing scales may help
-
-more important for variance parameters than fixed-effect parameters
-
-## Finite-size corrections
-
-e.g. Normal vs. $t$
+- reduce bias in estimated variances and covariances
+- similar to dividing by $n-1$ instead of $n$ when computing sample variances
+- example: paired $t$-test
+- works by 
 
 ## Fit model
 
@@ -294,11 +278,46 @@ ggplot(aa,aes(.fitted,sqrt(abs(.resid))))+geom_point()+geom_smooth()
 ggplot(aa)+stat_qq(aes(sample=.resid))
 ```
 
+# The broom/broom.mixed packages
+
+- `tidy`: get coefficient values
+    - `effects="fixed"`
+    - `effects="ran_vars"`
+	- `effects="ran_vals"`
+	- `effects="ran_coefs"`
+- `glance`: get model summaries
+- `augment`: get fitted, residuals, possibly predictions	
+
+# Inference
+
+## Likelihood
+
+- probability of data given model
+- for mixed models, includes the integral over the random effects
+
+## Profiles and intervals
+
+## Wald approximation
+
+most important:
+
+- small sample sizes
+- values near boundaries
+     - changing scales may help
+
+more important for variance parameters than fixed-effect parameters
+
+## Finite-size corrections
+
+e.g. Normal vs. $t$
+
+
 ## Posterior predictive simulation
 
 - if there is some value you're interested in that you can compute from your data (e.g. number of zero observations, or total NPP), you can `simulate()` it fro the fitted model:
 
 ```{r pps}
+
 ```
 
 ## Inference: fixed effects, Wald

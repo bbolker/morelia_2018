@@ -44,8 +44,6 @@ library("dotwhisker")  ## coefficient plots
 ## data manipulation
 library("broom")
 library("broom.mixed")
-library("reshape2")
-library("plyr")
 ```
 
 <!-- (trying to fix heading display) -->
@@ -53,6 +51,11 @@ library("plyr")
 ## Linear mixed model: starling example
 
 Data from Toby Marthews, [r-sig-mixed-models mailing list](http://tolstoy.newcastle.edu.au/R/e13/help/11/01/1364.html): you can find it [here](https://github.com/bbolker/upr_2016/tree/master/lab/data).
+
+- `subject`: individual bird
+- `roostsitu` (tree, nest-box, inside, other): location of nest box
+- `mnth` (Nov, Jan): month
+- `stmass`: mass of bird
 
 ### Graphics: spaghetti plots
 
@@ -72,6 +75,7 @@ ggplot(dataf,aes(mnth,stmass,colour=roostsitu))+
     geom_point()+
     geom_line(aes(group=subject))
 ```
+
 for comparison: what are the tradeoffs?
 
 Overkill for this data set, but sometimes it can be useful to put every individual in its own facet:
@@ -93,12 +97,7 @@ If we fit this with lme4
 lme1 <- lmer(stmass~mnth*roostsitu+(1|subject/mnth),data=dataf)
 ```
 
-We get an error: if we fit this with
-
-```{r lmefit1,eval=FALSE}
-lme(stmass~mnth*roostsitu, random= ~1|subject/mnth,data=dataf)
-```
-it lets us do it, silently (but runs into trouble farther down the road). We *can* actually do this (`lmerControl(check.nobs.vs.nlev="ignore")`; see `?lmerControl` for details), and it will actually work, but it will pick an arbitrary division between the residual variance and the `month:subject` variance.
+We get an error. We *can* actually do this (`lmerControl(check.nobs.vs.nlev="ignore")`; see `?lmerControl` for details), and it will actually work, but it will pick an arbitrary division between the residual variance and the `month:subject` variance.
 
 But now let's forget about including the (unidentifiable) random slopes.
 ```{r lmer2}
@@ -149,7 +148,6 @@ cat(lmer2out[17:25],sep="\n")
 
 - the standard fixed-effect output. `lmer` does *not* tell us the denominator degrees of freedom for the test (although we can get a rough idea of importance/significance fro the $t$ statistics; e.g. $t>2.5$ will be significant at $p<0.05$ for 6 or more degrees of freedom). We'll come back to this in the inference section.
 
-
 ## Diagnostic plots
 
 Basic diagnostic plots: fitted vs. residuals, coloured according to the `roostsitu` variable (`col=dataf$roostsitu`), point type according to month (`pch=`).
@@ -182,7 +180,7 @@ We can also do this with `broom.mixed::augment()` and `stat_qq()` (although ther
 ```{r ggqq,fig.keep="none",cache=TRUE}
 ggplot(augment(lmer2),
        aes(sample=.resid/sd(.resid)))+  ## scale to variance=1
-        stat_qq(aes(group=1,colour=roostsitu))+
+    stat_qq(aes(group=1,colour=roostsitu))+
     geom_abline(intercept=0,slope=1)
 ```
 
@@ -248,18 +246,15 @@ Stop and explain to yourself what these parameters mean.  If you're not sure, tr
 
 Rearrange the data to get differences by subject:
 ```{r diffmass}
-library(plyr)
-dataf2 <- ddply(dataf,"subject", summarise,
-             roostsitu=roostsitu[1],massdiff=diff(stmass))
+dataf2 <- aggregate(stmass~roostsitu+subject,
+               data=dataf,
+               FUN=function(x) x[2]-x[1])
 ```
-This says to split the data frame `dataf` by the `subject` variable;
-for each value of `subject`, put together a data frame with a `roostsitu`
-variable equal to the first element of the `rootsitu` vector for that
-subject and a `massdiff` variable equal to the difference between the masses.
+This says to aggregate the data frame `dataf` grouped by `roostsitu` and `subject`; for each group, compute the difference of the masses.
 
 Draw a picture (boxplot+beeswarm plot):
 ```{r plotdiffs,message=FALSE}
-ggplot(dataf2,aes(x=roostsitu,y=massdiff))+geom_boxplot()+
+ggplot(dataf2,aes(x=roostsitu,y=stmass))+geom_boxplot()+
    geom_dotplot(binaxis="y",stackdir="center",fill="red",alpha=0.5,
                 binwidth=0.5)
 ```
@@ -270,7 +265,7 @@ As you can see, `geom_dotplot()` adds a horizontal dot-plot for each group
 - It is also possible to rearrange and summarize the data to test the difference in intercepts, or to estimate the among-individual variance in intercepts (how?)
 
 ```{r lmcheat,echo=FALSE,results="hide"}
-summary(lm(massdiff~roostsitu,dataf2))
+summary(lm(stmass~roostsitu,dataf2))
 ```
 
 ## Inference part 2
@@ -332,23 +327,13 @@ The alternative approach is to use `options(contrasts=c("contr.sum","contr.poly"
 - Use `afex::mixed` to do "type 3" tests of all effects in
 a model (using Kenward-Roger to get df by default).
 ```{r mixed}
-mixed(stmass~mnth*roostsitu+(1|subject),data=dataf)
+afex::mixed(stmass~mnth*roostsitu+(1|subject),data=dataf)
 ```
 - Use `anova()` to do a likelihood ratio test on
 individual pairs of models.
 - Use `drop1()` to drop terms from the model one at a time
-- `nlme::lme` also gives denominator df
-```{r lme}
-lme2 <- lme(stmass~mnth*roostsitu,random=~1|subject,data=dataf,
-    contrasts=list(mnth=contr.sum,roostsitu=contr.sum))
-anova(lme2,type="marginal")
-```
+
 **be careful when doing "marginal"/"type 3" tests in the presence of interactions!**
-Also note that `nlme::lme` gets denominator df calculations wrong for some random-slopes models. If you want to try `lme`'s denominator df calculations without actually fitting the model:
-```{r calcdendf,}
-source("../R/calcDenDF.R")
-calcDenDF(~roostsitu*mnth,"subject",dataf)
-```
 
 In this case the results ($F$ values) are identical **because the original design is balanced (hence, orthogonal)**.  Not true if the data are (1) unbalanced (which is often true of ANOVA [categorical-predictor] designs, and almost always true of regression designs) or (2) GLMM or nonlinear.
 
@@ -396,7 +381,7 @@ pf(fvals,numdf,dendf,lower.tail=FALSE)
 
 Alternatively, we can try a parametric bootstrap: the `pbkrtest` package can do this, or we can just set it up by hand:
 
-```{r pboot,cache=TRUE,warning=FALSE}
+```{r pboot,echo=FALSE,cache=TRUE,warning=FALSE}
 lmer3 <- lmer(stmass~mnth*roostsitu+(1|subject),data=dataf)
 lmer4 <- lmer(stmass~mnth+roostsitu+(1|subject),data=dataf)
 
@@ -413,15 +398,18 @@ boothist <- rlply(1000,pboot(lmer4,lmer3))
 ## can use .progress="text" to get a progress bar ...
 boothist <- unlist(boothist)
 hist(boothist,breaks=50,col="gray")
+
 obsval <- 2*(logLik(lmer3)-logLik(lmer4))
 abline(v=obsval,col=2,lwd=2)
 mean(boothist>obsval)
 ```
 
-```{r pbkrtest}
+```{r pbkrtest,warning=FALSE}
 library(pbkrtest)
-KRmodcomp(lmer3,lmer4)
+t1 <- system.time(PBmodcomp(lmer3,lmer4,nsim=500))
 ```
+
+(takes `r round(t1["elapsed"])` seconds)
 
 In this case, the Kenward-Roger correction appropriately does nothing different -- we have a classical balanced design and no correction is actually necessary.  But it does give a denominator df and a $p$-value for this lmer model, which is handy ...
 

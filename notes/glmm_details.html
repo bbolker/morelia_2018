@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Bolker" />
 
-<meta name="date" content="2018-07-30" />
+<meta name="date" content="2018-07-31" />
 
 <title>Generalized linear mixed models in R: nitty-gritty</title>
 
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Generalized linear mixed models in R: nitty-gritty</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>30 July 2018</em></h4>
+<h4 class="date"><em>31 July 2018</em></h4>
 
 </div>
 
@@ -214,6 +214,7 @@ g4 &lt;- MASS:::glmmPQL(incidence/size ~ period,
 e.g. Poisson, binomial (<span class="math inline">\(N&gt;1\)</span>)</li>
 <li>sum^2 of Pearson residuals / residual degrees of freedom</li>
 <li>e.g. <code>aods3::gof()</code></li>
+<li>observation-level random effects</li>
 </ul>
 </div>
 <div id="dealing-with-overdispersion" class="section level2">
