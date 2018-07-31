@@ -92,5 +92,11 @@ e.g. Poisson, binomial ($N>1$)
 
 ## zero-inflation
 
+- `glmmTMB` etc.
+- Owls example
+
 ## Complete separation
+
+- penalized regression
+- add priors!
 

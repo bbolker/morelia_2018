@@ -1,4 +1,8 @@
 - notes!
+
+GLMM examples/lab
+check LMM lab
+
 - datavis:
       - glyc plot 1 -> ggplot?
       - second glyc plot?

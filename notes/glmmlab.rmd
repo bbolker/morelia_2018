@@ -9,12 +9,23 @@ library(lme4)
 library(glmmTMB)
 ```
 
+## CBPP data
+
+```{r}
+data("cbpp",package="lme4")
+glmer(incidence/size~period+(1|herd),
+      data=cbpp,
+      family=binomial)
+```
+
+## gopher tortoise data
+
 ```{r}
 load("../data/gopherdat2.RData")
 head(Gdat)
 ```
 
-```{r}
+```{r eval=FALSE}
 Gdat$obs <- factor(seq(nrow(Gdat)))
 glmer(shells~prev+offset(log(Area))+(1|year)+(1|Site),
       family=poisson,data=Gdat)

@@ -1,0 +1,34 @@
+---
+title: "additional topics"
+author: Ben Bolker
+bibliography: "../glmm.bib"
+date: "`r format(Sys.time(), '%d %B %Y ')`"
+---
+
+## Effect size measures
+
+- I would generally recommend finding standardized effect sizes by scaling continuous predictors by their standard deviation as recommended by @schielzeth_simple_2010 (or by 2SD as suggested by @gelman_scaling_2008)
+- R-squared measures:
+- overall metric like $\eta^2$:
+> Unfortunately this is currently not possible.
+I believe that most of these problems are also discussed in a recent Psych Methods paper [@rights_quantifying_2018] ... The fact that calculating a global measure of model fit (such as R2) is already riddled with complications and that no simple single number can be found, should be a hint that doing so for a subset of the model parameters (i.e., main-effects or interactions) is even more difficult. Given this, I would not recommend to try finding a measure of standardized effect sizes for mixed models. [@singmann_compute_2018]
+- see 
+
+## Temporal correlation
+
+- Easier than spatial correlation!
+- Diagnose (without trying to incorporate it in the model) via `nlme::ACF`
+- use `correlation=` argument in `lme` or `MASS::glmmPQL`
+- temporal correlation options in: `glmmTMB`, `brms`, `MCMCglmm`, `INLA` ...
+
+## Spatial correlation
+
+- use smooth terms (see E. Gonzalez's course ...)
+- `glmmPQL`, `spaMM`, `INLA`, ... see @dormann_methods_2007 (now a bit out of date)
+
+## Multivariate models
+
+- via implicit melting: `MCMCglmm`
+- via melting: `lme4` etc.
+
+## References
