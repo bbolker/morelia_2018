@@ -139,6 +139,7 @@ library(dotwhisker)</code></pre>
 </div>
 <div id="integration-methods" class="section level2">
 <h2>integration methods</h2>
+<p>You do have to decide on an approximation method.</p>
 <ul>
 <li>penalized quasi-likelihood
 <ul>
@@ -156,6 +157,7 @@ library(dotwhisker)</code></pre>
 <li>most limited</li>
 </ul></li>
 </ul>
+<p>In <code>lme4</code>, use the <code>nAGQ=</code> argument; <code>nAGQ=1</code> (default) corresponds to Laplace approximation</p>
 </div>
 <div id="integration-rules" class="section level2">
 <h2>integration rules</h2>
@@ -210,6 +212,8 @@ g4 &lt;- MASS:::glmmPQL(incidence/size ~ period,
 <li>reminder: “too much” variance</li>
 <li>only applies to families with <em>estimated</em> variance:<br />
 e.g. Poisson, binomial (<span class="math inline">\(N&gt;1\)</span>)</li>
+<li>sum^2 of Pearson residuals / residual degrees of freedom</li>
+<li>e.g. <code>aods3::gof()</code></li>
 </ul>
 </div>
 <div id="dealing-with-overdispersion" class="section level2">

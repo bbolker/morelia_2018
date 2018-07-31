@@ -14,6 +14,7 @@ library(pander)
 library(lme4)
 library(broom)
 library(broom.mixed)
+library(emmeans)
 ```
 
 # Model specification
@@ -295,7 +296,10 @@ ggplot(aa)+stat_qq(aes(sample=.resid))
 
 ## Posterior predictive simulation
 
-- if there is some value you're interested in that you can compute from your data (e.g. number of zero observations, or total NPP)
+- if there is some value you're interested in that you can compute from your data (e.g. number of zero observations, or total NPP), you can `simulate()` it fro the fitted model:
+
+```{r pps}
+```
 
 ## Inference: fixed effects, Wald
 
@@ -358,4 +362,22 @@ Very slow!
 ```{r eval=FALSE}
 mm <- model.matrix(terms(fitted_model),newdat)
 se_pred <- sqrt(diag(mm %*% tcrossprod(vcov(fitted_model),mm)))
+```
+
+## emmeans etc.
+
+```{r oats_effects}
+data("Oats",package="nlme")
+m_oats <- lmer(yield~nitro*Variety+(1|Block),data=Oats)
+(e1 <- emmeans(m_oats,~nitro|Variety))
+plot(e1)
+e2 <- emmeans(m_oats,~Variety)
+##
+contrast(e2,"pairwise")
+```
+
+also see the `effects` package.
+
+```{r oats_anova}
+car::Anova(m_oats,test="F")
 ```

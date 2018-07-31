@@ -18,6 +18,8 @@ Most aspects of GLMMs are carried over from LMMs (random effects) and GLMs (fami
 
 ## integration methods
 
+You do have to decide on an approximation method.
+
 - penalized quasi-likelihood
     - fastest/least accurate
 	- uses quasi-likelihood (no AIC etc.?)
@@ -27,6 +29,8 @@ Most aspects of GLMMs are carried over from LMMs (random effects) and GLMs (fami
     - slowest
     - most accurate
     - most limited
+
+In `lme4`, use the `nAGQ=` argument; `nAGQ=1` (default) corresponds to Laplace approximation
 
 ## integration rules
 
@@ -76,6 +80,8 @@ dwplot(list(Laplace=g1,AGQ5=g2,AGQ10=g3,glmmPQL=g4))
 - reminder: "too much" variance
 - only applies to families with *estimated* variance:  
 e.g. Poisson, binomial ($N>1$)
+- sum^2 of Pearson residuals / residual degrees of freedom
+- e.g. `aods3::gof()`
 
 ## dealing with overdispersion
 
