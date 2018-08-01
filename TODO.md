@@ -1,9 +1,9 @@
+
+https://link.springer.com/book/10.1007/978-3-319-19425-7
 - notes!
 
 GLMM examples/lab
 check LMM lab
-
-
 
 - datavis:
       - glyc plot 1 -> ggplot?

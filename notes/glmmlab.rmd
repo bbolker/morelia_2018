@@ -11,11 +11,16 @@ library(glmmTMB)
 
 ## CBPP data
 
-```{r}
+```{r cbpp}
 data("cbpp",package="lme4")
 glmer(incidence/size~period+(1|herd),
       data=cbpp,
+      weights=size,
       family=binomial)
+```
+
+```{r}
+
 ```
 
 ## gopher tortoise data

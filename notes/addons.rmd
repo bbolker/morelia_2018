@@ -5,10 +5,22 @@ bibliography: "../glmm.bib"
 date: "`r format(Sys.time(), '%d %B %Y ')`"
 ---
 
+```{r pkgs}
+library(lme4)
+library(nlme)
+library(dotwhisker)
+library(broom)
+library(broom.mixed)
+library(cowplot)
+library(r2glmm)
+```
+
 ## Effect size measures
 
 - I would generally recommend finding standardized effect sizes by scaling continuous predictors by their standard deviation as recommended by @schielzeth_simple_2010 (or by 2SD as suggested by @gelman_scaling_2008)
 - R-squared measures:
+     - generalized linear models: have to decide whether to include sampling variance or not, and what measure of variability to use
+     - mixed models: have to decide how to account for/include variability at different levels
 - overall metric like $\eta^2$:
 
 > Unfortunately this is currently not possible.
@@ -16,12 +28,49 @@ date: "`r format(Sys.time(), '%d %B %Y ')`"
 
 - see the relevant section of the [glmm FAQ](http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#how-do-i-compute-a-coefficient-of-determination-r2-or-an-analogue-for-glmms) for packages etc. ...
 
+Example: using the `r2beta()` package with `method="nsj"` [nakagawa_general_2013;@johnson_extension_2014]
+
+```{r grsq}
+library(lme4)
+load("../data/gopherdat2.RData")
+Gdat <- transform(Gdat,fYear=factor(year))
+gmod_lme4_L <- glmer(shells~prev+fYear+(1|Site),
+                     offset=log(Area),
+                     family=poisson,data=Gdat,
+                     control=glmerControl(optimizer="bobyqa",
+                                          check.conv.grad=.makeCC("warning",0.05)))
+r2beta(gmod_lme4_L,method="nsj")
+```
+
+```{r dwplot1,echo=FALSE}
+tfun <- function(title="",by_2sd=TRUE) {
+    dwplot(gmod_lme4_L,effect="fixed",by_2sd=by_2sd)+ggtitle(title)+
+        geom_vline(xintercept=0,lty=2)
+}
+plot_grid(tfun("unstandardized\ndwplot(...,by_2sd=FALSE)",FALSE),
+          tfun("standardized (default)\ndwplot(by_2sd=TRUE)"))
+
+```
+    
 ## Temporal correlation
 
 - Easier than spatial correlation!
 - Diagnose (without trying to incorporate it in the model) via `nlme::ACF`
 - use `correlation=` argument in `lme` or `MASS::glmmPQL`
 - temporal correlation options in: `glmmTMB`, `brms`, `MCMCglmm`, `INLA` ...
+
+```{r acf1}
+m1 <- lme(Reaction~Days,
+          random=~Days|Subject,
+          sleepstudy)
+plot(ACF(m1),alpha=0.05)
+## this appears to fit, but makes the intercept/slope model singular
+m1A <- update(m1,
+              correlation=corAR1(),
+              control=lmeControl(opt="optim"))
+intervals(m1A)
+plot(ACF(m1A,resType="normalized"),alpha=0.05)
+```
 
 ## Spatial correlation
 
