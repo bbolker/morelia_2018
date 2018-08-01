@@ -2,45 +2,245 @@
 title: "Mixed model lab #2 (GLMMs)"
 author: Ben Bolker
 date: "`r format(Sys.time(), '%H:%M %d %B %Y ')`"
+bibliography: "../glmm.bib"
 ---
 
-```{r}
+```{r pkgs,message=FALSE}
 library(lme4)
 library(glmmTMB)
+library(aods3)
+library(glmmTMB)
+library(broom)
+library(broom.mixed)
+library(dotwhisker)
 ```
+
+# Model simplification examples
+
+- keep maximal model?
+- remove terms until non-singular?
+- find minimum-AIC model?
+- find minimum non-singular AIC model?
+
+@barr_random_2013; @bates_parsimonious_2015; @matuschek_balancing_2017
 
 ## CBPP data
 
+Starting again with the "basic" CBPP model:
+
 ```{r cbpp}
 data("cbpp",package="lme4")
-glmer(incidence/size~period+(1|herd),
+g1 <- glmer(incidence/size~period+(1|herd),
       data=cbpp,
       weights=size,
       family=binomial)
 ```
 
-```{r}
+What happens if we try to fit the *maximal* model?
 
+```{r maxvars,error=TRUE}
+g1max <- update(g1,.~.-(1|herd) + (period|herd))
 ```
+
+Use `glmerControl()` to override the warning ...
+
+```{r maxvars2}
+g1max <- glmer(incidence/size~period+(period|herd),
+      data=cbpp,
+      weights=size,
+      family=binomial,
+      control=glmerControl(check.nobs.vs.nRE="warning"))
+VarCorr(g1max)
+eigen(VarCorr(g1max)[[1]])$values
+```
+
+Look at `?convergence` ...
+
+```{r allfit,cache=TRUE}
+source("../R/allFit.R")
+af <- allFit(g1max)
+```
+
+We can use `summary(af)` to compare all of these fits.
+
+- `(period|herd)` vs. `(1|period/herd)` ([positive] compound symmetry)
+
+$$
+(\textrm{intercept}, \textrm{slope}) =
+\textrm{MVN}\left(\boldsymbol 0,
+\left[
+\begin{array}{cccc}
+\sigma^2_{\{h|1\}}  & . & . & .  \\
+\sigma_{\{h|1\},\{h|p_{21}\}} &
+\sigma^2_{\{h|p_{21}\}} & . & .  \\
+\sigma_{\{h|1\},     \{h|p_{31}\}} &
+\sigma_{\{h|p_{21}\},\{h|p_{31}\}} &
+\sigma^2_{\{h|p_{31}\}} & .  \\
+\sigma_{\{h|1\}     ,\{h|p_{41}\}} &
+\sigma_{\{h|p_{21}\},\{h|p_{41}\}} &
+\sigma_{\{h|p_{31}\},\{h|p_{41}\}} &
+\sigma^2_{\{h|p_{41}\}}
+\end{array}
+\right]
+\right)
+$$
+(=$(n(n+1))/2 = (4\times 5)/2 = 10$ parameters)
+vs.
+$$
+\left[
+\begin{array}{cccc}
+\sigma^2 & . & . & .  \\
+\rho \sigma^2 & \sigma^2 & . & .  \\
+\rho \sigma^2 & \rho \sigma^2 & \sigma^2 & .   \\
+\rho \sigma^2 & \rho \sigma^2 & \rho \sigma^2 & \sigma^2  \\
+\end{array}
+\right]
+$$
+where $\sigma^2 = \sigma^2_{\{b|1\}}+\sigma^2_{\{herd:period|1\}}$,
+$\rho = \sigma^2_{\{b|1\}}/\sigma^2$ (=2 parameters;
+$\rho$ must be >0)
+
+```{r maxvars_cs}
+g1cs <- update(g1max,
+               . ~ . - (period|herd) + (1|herd/period))
+```
+Works fine - but is equivalent to observation-level random effects!
 
 ## gopher tortoise data
 
-```{r}
+
+
+```{r g1}
 load("../data/gopherdat2.RData")
-head(Gdat)
-```
-
-```{r eval=FALSE}
 Gdat$obs <- factor(seq(nrow(Gdat)))
-glmer(shells~prev+offset(log(Area))+(1|year)+(1|Site),
-      family=poisson,data=Gdat)
-glmer(shells~prev+offset(log(Area))+year+(1|Site),
-      family=poisson,data=Gdat)
-
-glmer(shells~prev+offset(log(Area))+year+Site+
-          (1|obs),
-      family=poisson,data=Gdat)
-glmmTMB(shells~prev+offset(log(Area))+year+Site+
-          (1|obs),
+```
+Our desired maximal model would be something like
+```{r g2}
+glmer(shells~prev+offset(log(Area))+(1|year)+(1|Site)+(1|obs),
       family=poisson,data=Gdat)
 ```
+or
+```{r g3}
+glmmTMB(shells~prev+offset(log(Area))+(1|year)+(1|Site),
+      family=nbinom2,data=Gdat)
+```
+
+Problems ...
+
+ended up with this ...
+
+```{r g4}
+gmod_lme4_L <- glmer(shells~prev+offset(log(Area))+factor(year)+(1|Site),
+      family=poisson,data=Gdat,
+      control=glmerControl(optimizer="bobyqa",
+                           check.conv.grad=.makeCC("warning",0.05)))
+
+```
+
+(see [ecostats example](https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html))
+
+## Arabidopsis data
+
+Try full model (except use only a simple fixed effect for the top-level region, `reg`, which has only 3 levels):
+
+```{r banta1,cache=TRUE}
+load("../data/Banta.RData")
+t0 <- system.time(
+    mp1 <- glmer(total.fruits ~ nutrient*amd +
+                 reg + rack + status +
+                 (amd*nutrient|popu)+
+                 (amd*nutrient|gen),
+             data=dat.tf,
+             family="poisson")
+)
+```
+
+Inspect for singularity/overdispersion:
+
+```{r banta_chk}
+eigen(VarCorr(mp1)$gen)$values
+eigen(VarCorr(mp1)$popu)$values
+deviance(mp1)/df.residual(mp1) ## !!
+aods3::gof(mp1)
+```
+
+Add observation-level random effect (switch optimizer to BOBYQA)
+
+```{r banta2,cache=TRUE}
+dat.tf$obs <- 1:nrow(dat.tf)
+t1 <- system.time(
+    mp1X <- update(mp1,
+                   . ~. + (1|obs),
+                   control=glmerControl(optimizer="bobyqa"))
+)
+```
+
+This model has 28 parameters and takes `r round(t1["elapsed"])` seconds ... Is `glmmTMB` faster?
+
+```{r glmmTMBfit,cache=TRUE}
+t2 <- system.time(
+    mp1g <- glmmTMB(total.fruits ~ nutrient*amd +
+                        reg + rack + status +
+                        (amd*nutrient|popu)+
+                        (amd*nutrient|gen)+
+                        (1|obs),
+                    data=dat.tf,
+                    family="poisson")
+)
+```
+
+Better (`r round(t2["elapsed"])`), although 
+`glmmTMB` doesn't handle singular fits quite as gracefully ...
+
+```{r reduce1,cache=TRUE}
+mp1X2 <- update(mp1X,
+                . ~ . - (amd*nutrient|popu)
+                - (amd*nutrient|gen)
+                + (amd+nutrient|popu)
+                + (amd+nutrient|gen))
+```
+
+Ugh, looks even worse ...
+
+```{r showreduce}
+VarCorr(mp1X2)
+```
+
+Use `lmer_alt` to split factor variable into separate terms ...
+```{r X3,cache=TRUE}
+mp1X3 <- afex::lmer_alt(total.fruits ~ nutrient*amd +
+                            reg + rack + status +
+                            (amd*nutrient||popu)+
+                            (amd*nutrient||gen)+
+                            (1|obs),
+                        data=dat.tf,
+                        family="poisson")
+```
+
+Strip down further:
+```{r X4,cache=TRUE}
+mp1X4 <- update(mp1X2,
+                . ~ . - (amd+nutrient|popu)
+                - (amd+nutrient|gen)
+                + (nutrient|popu)
+                + (1|gen))
+```
+
+Still correlation=+1, reduce further:
+
+```{r X5,cache=TRUE}
+mp1X5 <- afex::lmer_alt(total.fruits ~ nutrient*amd +
+                            reg + rack + status +
+                            (1|gen)+
+                            (1+nutrient||popu)+
+                            (1|obs),
+                        data=dat.tf,
+                        family="poisson")
+```
+
+```{r dwplot}
+dwplot(list(mp1,mp1X3,mp1X4,mp1X5),effect="fixed")+
+    geom_vline(xintercept=0,lty=2)
+```
+
+## References

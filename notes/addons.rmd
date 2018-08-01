@@ -15,6 +15,30 @@ library(cowplot)
 library(r2glmm)
 ```
 
+## List of possible topics
+
+- effect size measures/$R^2$
+- type III sums of squares (mostly philosophical)
+- zero-inflation
+- temporal autocorrelation
+
+## type III sums of squares
+
+There is a long-standing argument about the *principle of marginality*: when does it make sense to interpret/test the significance of a main effect in a model where that effect is also involved in an interaction?
+
+- main effect parameter value/significance is always evaluated **for a particular value of all of the other parameters**
+- when the interaction is present, that implies that the value/significance changes depending on where you test it.
+- for an interaction with a continuous variable, the parameter will always be significant *eventually*
+- the "average" condition might not make biological sense (what is halfway between male and female?)
+- if marginality is violated, parameter effects/SSQ depend on how the model is parameterized/where the baseline (zero value) of each parameter lies
+
+**the bottom line**
+
+- need to choose a *sensible* "model center" [@schielzeth_simple_2010]
+- center continuous variables by their mean, or by the minimum, or some sensible reference point
+- center factor variables by using *sum-to-zero* contrasts (weights equally across levels), *or* see "Weights" in `?emmeans::emmeans`
+- type-3 ANOVAs are available from `lmerTest`, `car::Anova`, `afex` ...
+
 ## Effect size measures
 
 - I would generally recommend finding standardized effect sizes by scaling continuous predictors by their standard deviation as recommended by @schielzeth_simple_2010 (or by 2SD as suggested by @gelman_scaling_2008)
