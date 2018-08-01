@@ -5,7 +5,7 @@ bibliography: "../glmm.bib"
 date: "`r format(Sys.time(), '%d %B %Y ')`"
 ---
 
-```{r pkgs}
+```{r pkgs,message=FALSE}
 library(lme4)
 library(nlme)
 library(dotwhisker)
