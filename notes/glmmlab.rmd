@@ -2,6 +2,7 @@
 title: "Mixed model lab #2 (GLMMs)"
 author: Ben Bolker
 date: "`r format(Sys.time(), '%H:%M %d %B %Y ')`"
+bibliography: "../glmm.bib"
 ---
 
 ```{r pkgs,message=FALSE}
@@ -13,6 +14,15 @@ library(broom)
 library(broom.mixed)
 library(dotwhisker)
 ```
+
+# Model simplification examples
+
+- keep maximal model?
+- remove terms until non-singular?
+- find minimum-AIC model?
+- find minimum non-singular AIC model?
+
+@barr_random_2013; @bates_parsimonious_2015; @matuschek_balancing_2017
 
 ## CBPP data
 
@@ -53,29 +63,81 @@ af <- allFit(g1max)
 
 We can use `summary(af)` to compare all of these fits.
 
+- `(period|herd)` vs. `(1|period/herd)` ([positive] compound symmetry)
+
+$$
+(\textrm{intercept}, \textrm{slope}) =
+\textrm{MVN}\left(\boldsymbol 0,
+\left[
+\begin{array}{cccc}
+\sigma^2_{\{h|1\}}  & . & . & .  \\
+\sigma_{\{h|1\},\{h|p_{21}\}} &
+\sigma^2_{\{h|p_{21}\}} & . & .  \\
+\sigma_{\{h|1\},     \{h|p_{31}\}} &
+\sigma_{\{h|p_{21}\},\{h|p_{31}\}} &
+\sigma^2_{\{h|p_{31}\}} & .  \\
+\sigma_{\{h|1\}     ,\{h|p_{41}\}} &
+\sigma_{\{h|p_{21}\},\{h|p_{41}\}} &
+\sigma_{\{h|p_{31}\},\{h|p_{41}\}} &
+\sigma^2_{\{h|p_{41}\}}
+\end{array}
+\right]
+\right)
+$$
+(=$(n(n+1))/2 = (4\times 5)/2 = 10$ parameters)
+vs.
+$$
+\left[
+\begin{array}{cccc}
+\sigma^2 & . & . & .  \\
+\rho \sigma^2 & \sigma^2 & . & .  \\
+\rho \sigma^2 & \rho \sigma^2 & \sigma^2 & .   \\
+\rho \sigma^2 & \rho \sigma^2 & \rho \sigma^2 & \sigma^2  \\
+\end{array}
+\right]
+$$
+where $\sigma^2 = \sigma^2_{\{b|1\}}+\sigma^2_{\{herd:period|1\}}$,
+$\rho = \sigma^2_{\{b|1\}}/\sigma^2$ (=2 parameters;
+$\rho$ must be >0)
+
+```{r maxvars_cs}
+g1cs <- update(g1max,
+               . ~ . - (period|herd) + (1|herd/period))
+```
+Works fine - but is equivalent to observation-level random effects!
+
 ## gopher tortoise data
 
-How do we reduce this to something that will work?
 
-```{r}
+
+```{r g1}
 load("../data/gopherdat2.RData")
-head(Gdat)
-```
-
-```{r eval=FALSE}
 Gdat$obs <- factor(seq(nrow(Gdat)))
-glmer(shells~prev+offset(log(Area))+(1|year)+(1|Site),
-      family=poisson,data=Gdat)
-glmer(shells~prev+offset(log(Area))+year+(1|Site),
-      family=poisson,data=Gdat)
-
-glmer(shells~prev+offset(log(Area))+year+Site+
-          (1|obs),
-      family=poisson,data=Gdat)
-glmmTMB(shells~prev+offset(log(Area))+year+Site+
-          (1|obs),
+```
+Our desired maximal model would be something like
+```{r g2}
+glmer(shells~prev+offset(log(Area))+(1|year)+(1|Site)+(1|obs),
       family=poisson,data=Gdat)
 ```
+or
+```{r g3}
+glmmTMB(shells~prev+offset(log(Area))+(1|year)+(1|Site),
+      family=nbinom2,data=Gdat)
+```
+
+Problems ...
+
+ended up with this ...
+
+```{r g4}
+gmod_lme4_L <- glmer(shells~prev+offset(log(Area))+factor(year)+(1|Site),
+      family=poisson,data=Gdat,
+      control=glmerControl(optimizer="bobyqa",
+                           check.conv.grad=.makeCC("warning",0.05)))
+
+```
+
+(see [ecostats example](https://bbolker.github.io/mixedmodels-misc/ecostats_chap.html))
 
 ## Arabidopsis data
 
@@ -175,3 +237,10 @@ mp1X5 <- afex::lmer_alt(total.fruits ~ nutrient*amd +
                         data=dat.tf,
                         family="poisson")
 ```
+
+```{r dwplot}
+dwplot(list(mp1,mp1X3,mp1X4,mp1X5),effect="fixed")+
+    geom_vline(xintercept=0,lty=2)
+```
+
+## References

@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Bolker" />
 
-<meta name="date" content="2018-07-29" />
+<meta name="date" content="2018-08-01" />
 
 <title>Bayesian lab</title>
 
@@ -124,34 +124,14 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Bayesian lab</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>29 July 2018</em></h4>
+<h4 class="date"><em>01 August 2018</em></h4>
 
 </div>
 
 
-<pre class="r"><code>library(MCMCglmm)</code></pre>
-<pre><code>## Loading required package: Matrix</code></pre>
-<pre><code>## Loading required package: coda</code></pre>
-<pre><code>## Loading required package: ape</code></pre>
-<pre class="r"><code>library(brms)</code></pre>
-<pre><code>## Loading required package: Rcpp</code></pre>
-<pre><code>## Loading required package: ggplot2</code></pre>
-<pre><code>## Registered S3 methods overwritten by 'ggplot2':
-##   method         from 
-##   [.quosures     rlang
-##   c.quosures     rlang
-##   print.quosures rlang</code></pre>
-<pre><code>## Registered S3 method overwritten by 'dplyr':
-##   method               from  
-##   as.data.frame.tbl_df tibble</code></pre>
-<pre><code>## Registered S3 method overwritten by 'xts':
-##   method     from
-##   as.zoo.xts zoo</code></pre>
-<pre><code>## Loading 'brms' package (version 2.4.0). Useful instructions
-## can be found by typing help('brms'). A more detailed introduction
-## to the package is available through vignette('brms_overview').
-## Run theme_set(theme_default()) to use the default bayesplot theme.</code></pre>
-<pre class="r"><code>library(coda)
+<pre class="r"><code>library(MCMCglmm)
+library(brms)
+library(coda)
 library(lattice)
 library(reshape2) ## for melt()
 ## devtools::install_github(&quot;mjskay/tidybayes&quot;)
@@ -180,12 +160,119 @@ xyplot(
 <p>These look the way they should (featureless “white noise” - no trends or slow variation).</p>
 <p>You can plot the distributions:</p>
 <pre class="r"><code>densityplot(mcmcglmm1$Sol)</code></pre>
-<p>but I prefer <em>violin plots</em> for this case:</p>
-<pre class="r"><code>md &lt;- reshape2::melt(as.matrix(mcmcglmm1$Sol)) ## change matrix to long form
-ggplot(subset(md,Var2!=&quot;(Intercept)&quot;),
+<p>but I prefer <em>violin plots</em> for this case: first need to</p>
+<pre class="r"><code>md &lt;- reshape2::melt(as.matrix(mcmcglmm1$Sol)) ## change matrix to long form</code></pre>
+<pre class="r"><code>ggplot(subset(md,Var2!=&quot;(Intercept)&quot;),
        aes(Var2,value))+geom_violin(fill=&quot;grey&quot;)+
     geom_hline(yintercept=0,lty=2)+
     coord_flip()</code></pre>
+</div>
+<div id="with-brms" class="section level2">
+<h2>with brms</h2>
+<pre class="r"><code>mcmcglmm2 &lt;- brm(stmass~mnth*roostsitu+(1|subject),
+                  family=gaussian,
+                  data=dataf)</code></pre>
+<pre><code>## Compiling the C++ model</code></pre>
+<pre><code>## Start sampling</code></pre>
+<pre><code>## 
+## SAMPLING FOR MODEL 'gaussian brms-model' NOW (CHAIN 1).
+## 
+## Gradient evaluation took 0.000288 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 2.88 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 0.662925 seconds (Warm-up)
+##                0.398003 seconds (Sampling)
+##                1.06093 seconds (Total)
+## 
+## 
+## SAMPLING FOR MODEL 'gaussian brms-model' NOW (CHAIN 2).
+## 
+## Gradient evaluation took 3.4e-05 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0.34 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 0.621263 seconds (Warm-up)
+##                0.2767 seconds (Sampling)
+##                0.897963 seconds (Total)
+## 
+## 
+## SAMPLING FOR MODEL 'gaussian brms-model' NOW (CHAIN 3).
+## 
+## Gradient evaluation took 3.4e-05 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0.34 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 0.422351 seconds (Warm-up)
+##                0.278577 seconds (Sampling)
+##                0.700928 seconds (Total)
+## 
+## 
+## SAMPLING FOR MODEL 'gaussian brms-model' NOW (CHAIN 4).
+## 
+## Gradient evaluation took 3.4e-05 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0.34 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 0.464329 seconds (Warm-up)
+##                0.301474 seconds (Sampling)
+##                0.765803 seconds (Total)</code></pre>
 </div>
 
 
