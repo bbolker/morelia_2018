@@ -4,26 +4,61 @@ author: Ben Bolker
 date: "`r format(Sys.time(), '%H:%M %d %B %Y ')`"
 ---
 
-```{r}
+```{r pkgs,message=FALSE}
 library(lme4)
 library(glmmTMB)
+library(aods3)
+library(glmmTMB)
+library(broom)
+library(broom.mixed)
+library(dotwhisker)
 ```
 
 ## CBPP data
 
+Starting again with the "basic" CBPP model:
+
 ```{r cbpp}
 data("cbpp",package="lme4")
-glmer(incidence/size~period+(1|herd),
+g1 <- glmer(incidence/size~period+(1|herd),
       data=cbpp,
       weights=size,
       family=binomial)
 ```
 
-```{r}
+What happens if we try to fit the *maximal* model?
+
+```{r maxvars,error=TRUE}
+g1max <- update(g1,.~.-(1|herd) + (period|herd))
+```
+
+Use `glmerControl()` to override the warning ...
+
+```{r maxvars2}
+g1max <- glmer(incidence/size~period+(period|herd),
+      data=cbpp,
+      weights=size,
+      family=binomial,
+      control=glmerControl(check.nobs.vs.nRE="warning"))
+VarCorr(g1max)
+eigen(VarCorr(g1max)[[1]])$values
+```
+
+Look at `?convergence` ...
+
+```{r allfit,cache=TRUE}
+source("../R/allFit.R")
+af <- allFit(g1max)
+```
+
+We can use `summary(af)` to compare all of these fits.
+```{r minvars3}
 
 ```
 
 ## gopher tortoise data
+
+How do we reduce this to something that will work?
 
 ```{r}
 load("../data/gopherdat2.RData")
@@ -44,3 +79,49 @@ glmmTMB(shells~prev+offset(log(Area))+year+Site+
           (1|obs),
       family=poisson,data=Gdat)
 ```
+
+## Arabidopsis data
+
+```{r banta1,cache=TRUE}
+load("../data/Banta.RData")
+t0 <- system.time(
+    mp1 <- glmer(total.fruits ~ nutrient*amd +
+                 reg + rack + status +
+                 (amd*nutrient|popu)+
+                 (amd*nutrient|gen),
+             data=dat.tf,
+             family="poisson")
+)
+```
+
+```{r banta_chk}
+eigen(VarCorr(mp1)$gen)$values
+eigen(VarCorr(mp1)$popu)$values
+deviance(mp1)/df.residual(mp1) ## !!
+aods3::gof(mp1)
+```
+
+```{r banta2,cache=TRUE}
+dat.tf$obs <- 1:nrow(dat.tf)
+t1 <- system.time(
+    mp1X <- update(mp1,
+                   . ~. + (1|obs),
+                   control=glmerControl(optimizer="bobyqa"))
+)
+```
+
+This model has 28 parameters ... Is `glmmTMB` faster?
+```{r glmmTMBfit,cache=TRUE}
+t2 <- system.time(
+    mp1g <- glmmTMB(total.fruits ~ nutrient*amd +
+                        reg + rack + status +
+                        (amd*nutrient|popu)+
+                        (amd*nutrient|gen)+
+                        (1|obs),
+                    data=dat.tf,
+                    family="poisson")
+)
+```
+
+`glmmTMB` doesn't handle singular fits quite as gracefully ...
+

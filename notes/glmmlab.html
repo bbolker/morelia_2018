@@ -123,39 +123,107 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Mixed model lab #2 (GLMMs)</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>08:27 31 July 2018</em></h4>
+<h4 class="date"><em>23:25 31 July 2018</em></h4>
 
 </div>
 
 
-<pre class="r"><code>library(lme4)</code></pre>
-<pre><code>## Loading required package: Matrix</code></pre>
-<pre class="r"><code>library(glmmTMB)</code></pre>
+<pre class="r"><code>library(lme4)
+library(glmmTMB)
+library(aods3)
+library(glmmTMB)
+library(broom)
+library(broom.mixed)
+library(dotwhisker)</code></pre>
 <div id="cbpp-data" class="section level2">
 <h2>CBPP data</h2>
+<p>Starting again with the “basic” CBPP model:</p>
 <pre class="r"><code>data(&quot;cbpp&quot;,package=&quot;lme4&quot;)
-glmer(incidence/size~period+(1|herd),
+g1 &lt;- glmer(incidence/size~period+(1|herd),
       data=cbpp,
       weights=size,
       family=binomial)</code></pre>
-<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
-##   Approximation) [glmerMod]
-##  Family: binomial  ( logit )
-## Formula: incidence/size ~ period + (1 | herd)
-##    Data: cbpp
-## Weights: size
-##      AIC      BIC   logLik deviance df.resid 
-## 194.0531 204.1799 -92.0266 184.0531       51 
-## Random effects:
-##  Groups Name        Std.Dev.
-##  herd   (Intercept) 0.6421  
-## Number of obs: 56, groups:  herd, 15
-## Fixed Effects:
-## (Intercept)      period2      period3      period4  
-##     -1.3983      -0.9919      -1.1282      -1.5797</code></pre>
+<p>What happens if we try to fit the <em>maximal</em> model?</p>
+<pre class="r"><code>g1max &lt;- update(g1,.~.-(1|herd) + (period|herd))</code></pre>
+<pre><code>## Error: number of observations (=56) &lt; number of random effects (=60) for term (period | herd); the random-effects parameters are probably unidentifiable</code></pre>
+<p>Use <code>glmerControl()</code> to override the warning …</p>
+<pre class="r"><code>g1max &lt;- glmer(incidence/size~period+(period|herd),
+      data=cbpp,
+      weights=size,
+      family=binomial,
+      control=glmerControl(check.nobs.vs.nRE=&quot;warning&quot;))</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : Model failed to converge with max|grad| = 0.0312476 (tol =
+## 0.001, component 1)</code></pre>
+<pre class="r"><code>VarCorr(g1max)</code></pre>
+<pre><code>##  Groups Name        Std.Dev. Corr                
+##  herd   (Intercept) 0.96037                      
+##         period2     1.38887  -0.892              
+##         period3     1.96166  -0.496  0.835       
+##         period4     0.90495  -0.811  0.460 -0.105</code></pre>
+<pre class="r"><code>eigen(VarCorr(g1max)[[1]])$values</code></pre>
+<pre><code>## [1] 5.813944e+00 1.704308e+00 4.005021e-05 1.296521e-07</code></pre>
+<p>Look at <code>?convergence</code> …</p>
+<pre class="r"><code>source(&quot;../R/allFit.R&quot;)
+af &lt;- allFit(g1max)</code></pre>
+<pre><code>## bobyqa :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## [OK]
+## Nelder_Mead :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : Model failed to converge with max|grad| = 0.697529 (tol =
+## 0.001, component 1)</code></pre>
+<pre><code>## [OK]
+## nlminbw :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## [OK]
+## nmkbw :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : Model failed to converge with max|grad| = 0.00148516 (tol =
+## 0.001, component 1)</code></pre>
+<pre><code>## [OK]
+## optimx.L-BFGS-B :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## Warning in optimx.check(par, optcfg$ufn, optcfg$ugr, optcfg$uhess, lower, : Parameters or bounds appear to have different scalings.
+##   This can cause poor performance in optimization. 
+##   It is important for derivative free methods like BOBYQA, UOBYQA, NEWUOA.</code></pre>
+<pre><code>## [OK]
+## nloptwrap.NLOPT_LN_NELDERMEAD :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : Model failed to converge with max|grad| = 0.00515361 (tol =
+## 0.001, component 1)</code></pre>
+<pre><code>## [OK]
+## nloptwrap.NLOPT_LN_BOBYQA :</code></pre>
+<pre><code>## Warning: number of observations (=56) &lt; number of random effects (=60)
+## for term (period | herd); the random-effects parameters are probably
+## unidentifiable
+
+## Warning: Model failed to converge with max|grad| = 0.00515361 (tol = 0.001,
+## component 1)</code></pre>
+<pre><code>## [OK]</code></pre>
+<p>We can use <code>summary(af)</code> to compare all of these fits.</p>
 </div>
 <div id="gopher-tortoise-data" class="section level2">
 <h2>gopher tortoise data</h2>
+<p>How do we reduce this to something that will work?</p>
 <pre class="r"><code>load(&quot;../data/gopherdat2.RData&quot;)
 head(Gdat)</code></pre>
 <pre><code>##    Site year shells  type Area density prev
@@ -177,6 +245,56 @@ glmer(shells~prev+offset(log(Area))+year+Site+
 glmmTMB(shells~prev+offset(log(Area))+year+Site+
           (1|obs),
       family=poisson,data=Gdat)</code></pre>
+</div>
+<div id="arabidopsis-data" class="section level2">
+<h2>Arabidopsis data</h2>
+<pre class="r"><code>load(&quot;../data/Banta.RData&quot;)
+t0 &lt;- system.time(
+    mp1 &lt;- glmer(total.fruits ~ nutrient*amd +
+                 reg + rack + status +
+                 (amd*nutrient|popu)+
+                 (amd*nutrient|gen),
+             data=dat.tf,
+             family=&quot;poisson&quot;)
+)</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : Model failed to converge with max|grad| = 0.00929584 (tol =
+## 0.001, component 1)</code></pre>
+<pre class="r"><code>eigen(VarCorr(mp1)$gen)$values</code></pre>
+<pre><code>## [1] 2.16692409 0.45254513 0.12343780 0.02322956</code></pre>
+<pre class="r"><code>eigen(VarCorr(mp1)$popu)$values</code></pre>
+<pre><code>## [1] 1.662864e+00 1.070736e-01 1.131348e-07 3.371084e-08</code></pre>
+<pre class="r"><code>deviance(mp1)/df.residual(mp1) ## !!</code></pre>
+<pre><code>## [1] 23.33933</code></pre>
+<pre class="r"><code>aods3::gof(mp1)</code></pre>
+<pre><code>## D  = 13910.24, df = 596, P(&gt;D) = 0
+## X2 = 15079.57, df = 596, P(&gt;X2) = 0</code></pre>
+<pre class="r"><code>dat.tf$obs &lt;- 1:nrow(dat.tf)
+t1 &lt;- system.time(
+    mp1X &lt;- update(mp1,
+                   . ~. + (1|obs),
+                   control=glmerControl(optimizer=&quot;bobyqa&quot;))
+)</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : unable to evaluate scaled gradient</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control
+## $checkConv, : Model failed to converge: degenerate Hessian with 1 negative
+## eigenvalues</code></pre>
+<p>This model has 28 parameters … Is <code>glmmTMB</code> faster?</p>
+<pre class="r"><code>t2 &lt;- system.time(
+    mp1g &lt;- glmmTMB(total.fruits ~ nutrient*amd +
+                        reg + rack + status +
+                        (amd*nutrient|popu)+
+                        (amd*nutrient|gen)+
+                        (1|obs),
+                    data=dat.tf,
+                    family=&quot;poisson&quot;)
+)</code></pre>
+<pre><code>## Warning in fitTMB(TMBStruc): Model convergence problem; non-positive-
+## definite Hessian matrix. See vignette('troubleshooting')</code></pre>
+<pre><code>## Warning in fitTMB(TMBStruc): Model convergence problem; false convergence
+## (8). See vignette('troubleshooting')</code></pre>
+<p><code>glmmTMB</code> doesn’t handle singular fits quite as gracefully …</p>
 </div>
 
 

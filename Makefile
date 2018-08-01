@@ -8,7 +8,7 @@ nnslides := notes/glmm.slides.html #$(notes:%=notes/%.slides.html)
 
 Datasets += aids.csv  Banta.RData  gopherdat2.csv culcitalogreg.csv gopherdat2.RData starling.RData culcita.RData gophertortoise.txt toenail.csv dufemalepers.csv tundra.csv Elston2001_tickdata.txt lizards.csv tundra_agg.rda
 
-Rfiles += monday.R geom_cstar.R calcDenDF.R
+Rfiles += lunes.R martes.R miércoles.R geom_cstar.R calcDenDF.R allFit.R
 
 dd := $(Datasets:%=data/%)
 rr := $(Rfiles:%=R/%)
