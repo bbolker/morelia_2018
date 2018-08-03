@@ -4,6 +4,11 @@ title: "statistical essentials for modeling"
 bibliography: ../glmm.bib
 ---
 
+![cc](pix/cc-attrib-nc.png)
+Licensed under the 
+[Creative Commons attribution-noncommercial license](http://creativecommons.org/licenses/by-nc/3.0/).
+Please share \& remix noncommercially, mentioning its origin.
+
 # Philosophy
 
 ## What do we mean by statistical inference?

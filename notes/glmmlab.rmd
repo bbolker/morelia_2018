@@ -5,6 +5,11 @@ date: "`r format(Sys.time(), '%H:%M %d %B %Y ')`"
 bibliography: "../glmm.bib"
 ---
 
+![cc](pix/cc-attrib-nc.png)
+Licensed under the 
+[Creative Commons attribution-noncommercial license](http://creativecommons.org/licenses/by-nc/3.0/).
+Please share \& remix noncommercially, mentioning its origin.
+
 ```{r pkgs,message=FALSE}
 library(lme4)
 library(glmmTMB)

@@ -4,6 +4,11 @@ author: Ben Bolker
 date: "`r format(Sys.time(), '%H:%M %d %B %Y ')`"
 ---
 
+![cc](pix/cc-attrib-nc.png)
+Licensed under the 
+[Creative Commons attribution-noncommercial license](http://creativecommons.org/licenses/by-nc/3.0/).
+Please share \& remix noncommercially, mentioning its origin.
+
 ## Preliminaries
 
 ```{r setup,echo=FALSE,message=FALSE}
