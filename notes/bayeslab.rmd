@@ -12,6 +12,7 @@ Please share \& remix noncommercially, mentioning its origin.
 
 ```{r pkgs,message=FALSE}
 library(MCMCglmm)
+library(lme4)
 library(brms)
 library(coda)
 library(lattice)
@@ -25,12 +26,32 @@ library(ggplot2); theme_set(theme_bw())
 load("../data/starling.RData")   ## loads "dataf"
 ```
 
-### Analyze starling data with `MCMCglmm`
+As a preliminary/context for the difficulties we will experience
+below, run a standard `lmer` model (`stmass~mnth*roostsitu+(1|subject)`)
+and plot the likelihood profile for the variance components.
+Neither of the MLEs is
+exactly at zero, but the lower 95% confidence interval of among-subject
+standard deviance definitely includes zero ... (cutoff shown in red).
+Even the 50% CI includes zero (dashed line).
 
+```{r prof,echo=FALSE,fig.width=8,fig.height=4,warning=FALSE}
+m1 <- lmer(stmass~mnth*roostsitu+(1|subject),data=dataf,
+           REML=FALSE)
+pp <- profile(m1,which="theta_",signames=FALSE,
+              delta.cutoff=1/100)
+dd <- as.data.frame(pp)
+ggplot(dd,aes(.focal,.zeta^2+1e-4))+geom_point(alpha=0.2)+geom_line()+
+    facet_wrap(~.par,scale="free")+
+    scale_y_log10()+
+    geom_hline(yintercept=qchisq(0.95,1),colour="red")+
+    geom_hline(yintercept=qchisq(0.5,1),colour="red",linetype=2)
+```
+
+### Analyze starling data with `MCMCglmm`
 
 `MCMCglmm` does a Bayesian analysis, which can be useful for more
 flexible inference, and has some more flexible covariance structures etc..
-For basic models, the syntax is very similar to `lme4`/`nlme`.
+For basic models, the syntax is very similar to `lme4`/`nlme`. (The random effect is specified separately, as in `lme`.)
 
 ```{r mcmcglmm,message=FALSE,cache=TRUE}
 mcmcglmm1 <- MCMCglmm(stmass~mnth*roostsitu,
@@ -45,13 +66,12 @@ We use `verbose=FALSE` to turn off the progress messages, which would be ugly in
 
 For MCMC approaches, it is your responsibility to check that the chain(s) are well-behaved.
 
-Try this:
+There is a `plot(.)` method for `MCMCglmm` objects - it shows the trace plots and density plots for all parameters - but it's not very pretty or very flexible. I prefer `xyplot()` for trace plots and `densityplot()` for density plots; you have to load the `lattice` package first, and you have to extract the relevant component of the `MCMCglmm` object and convert it to an `mcmc` object.
+
 ```{r mcmcplot1,fig.keep="none"}
-library("coda")
 xyplot(
     as.mcmc(mcmcglmm1$Sol),  ## convert matrix to `mcmc` object
     layout=c(2,4)            ## customize panel arrangement
-    ## (default layout )
 )
 ```
 
@@ -75,10 +95,136 @@ ggplot(subset(md,Var2!="(Intercept)"),
     coord_flip()
 ```    
 
+**But**: the variance components are definitely problematic.
+```{r}
+xyplot(
+    as.mcmc(mcmcglmm1$VCV),  ## convert matrix to `mcmc` object
+    layout=c(2,1)            ## customize panel arrangement
+)
+```
+
+Let's try the simplest brute-force approach, running the model for longer by increasing the `nitt` parameter from its default of 13,000:
+
+```{r mcmcLong,cache=TRUE}
+mcmcglmm1L <- MCMCglmm(stmass~mnth*roostsitu,
+                      random=~subject,
+                      data=dataf,
+                      nitt=2e5,
+                      verbose=FALSE)
+```
+
+Still bad:
+
+```{r longtrace}
+xyplot(
+    as.mcmc(mcmcglmm1L$VCV),  ## convert matrix to `mcmc` object
+    layout=c(2,1)            ## customize panel arrangement
+)
+```
+
+We probably have to change the prior, specifically choosing a prior that
+doesn't have a big spike at zero.  The prior is a *triple* list;
+
+- the first level includes one or more of `G` (group/random-effects priors), `R` (residuals), `B` (fixed effect) components
+- the `G` component contains a list of each of the random effects terms in the model (even though in this case there is only one
+- each element of the `G` list is a list of parameters. `V` gives the mean variance and `nu` is a "shape parameter" - the larger it is, the more concentrated the prior is around the mean. The default `nu` parameter is 0.
+
+```{r mcmcprior2}
+mcmcglmm2 <- MCMCglmm(stmass~mnth*roostsitu,
+                      random=~subject,
+                      data=dataf,
+                      prior=list(G=list(list(V=1,nu=5))),
+                      verbose=FALSE)
+```
+
+This works to give us a well-behaved trace plot:
+
+```{r priortrace}
+xyplot(
+    as.mcmc(mcmcglmm2$VCV),  ## convert matrix to `mcmc` object
+    layout=c(2,1)            ## customize panel arrangement
+)
+```
+
+```{r prior2dens}
+densityplot(
+    as.mcmc(mcmcglmm2$VCV),  ## convert matrix to `mcmc` object
+    layout=c(2,1)            ## customize panel arrangement
+)
+```
+
+
+## parameter-expanded priors:
+
+The pathologies of the mathematically convenient conjugate (inverse-gamma/inverse-Wishart) priors can be overcome in `MCMCglmm` by changing to what are called *parameter-expanded priors*. This is mathematically a bit complicated, but practically it boils down to specifying four parameters (`V`, `nu`, `alpha.mu`, and `alpha.mu`) instead of two. The good news is that you can generally set `V=1` and `alpha.mu=0`, which leaves only two to choose from. `alpha.V` gives the expected variance (so `sqrt(alpha.V)` is the expected standard deviation), and `nu` is now equivalent to the degrees of freedom for a $t$-distribution.
+Setting `V=1, nu=nu, alpha.mu = 0, alpha.V=s^2` gives a half-$t$ distribution
+with standard deviation `s` and df `nu`, e.g.:
+
+```{r parcurve}
+curve(dt(x/25,df=1),from=0,to=500,ylim=c(0,0.35))
+abline(h=0,lty=2)
+```
+
+Set up the prior:
+```{r prior2}
+prior2 <- list(G = list(G1 = list(V = 1, nu = 1,
+                                  alpha.mu = 0, alpha.V = 25^2)))
+```
+
+Run the model:
+```{r parrun,cache=TRUE}
+mcmcglmm3 <- MCMCglmm(stmass~mnth*roostsitu,
+                      random=~subject,
+                      data=dataf,
+                      prior=prior2,
+                      verbose=FALSE)
+```
+
+Looks good, and looks less shifted away from zero:
+
+```{r parexpandgraph} 
+mm <- as.mcmc(mcmcglmm3$VCV)
+xyplot(mm)
+densityplot(mm)
+```
+
 ## with brms
 
 ```{r brmsfit, cache=TRUE}
-print(system.time(mcmcglmm2 <- brm(stmass~mnth*roostsitu+(1|subject),
-                  family=gaussian,
-                  data=dataf)))
+brms1 <- brm(stmass~mnth*roostsitu+(1|subject),
+             family=gaussian,
+             data=dataf)
+```
+
+```{r print_brms}
+print(brms1}
+```
+
+---
+
+## Histograms vs densities of posterior distributions
+
+One drawback of density plots is that they don't work very precisely
+near boundaries, so it can be hard to see whether the mode of the prior
+distribution is at zero or not. (This isn't *terribly* important in
+a practical sense, but I was curious whether the various priors we
+set actually shifted the posterior mode away from zero or not.)
+Histograms can help in this case:
+
+```{r}
+source("../R/histogram.mcmc.R")
+histogram(
+    as.mcmc(mcmcglmm2$VCV),  ## convert matrix to `mcmc` object
+    layout=c(2,1),           ## customize panel arrangement
+    nint=30
+)
+```
+
+or with `ggplot`:
+
+```{r fig.width=8,fig.height=4}
+mmr <- reshape2::melt(as.matrix(mcmcglmm2$VCV))
+ggplot(mmr,aes(value))+
+    geom_histogram(binwidth=0.5,colour="black")+
+    facet_wrap(~Var2,scale="free")
 ```
