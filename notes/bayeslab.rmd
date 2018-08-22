@@ -156,7 +156,7 @@ densityplot(
 
 ## parameter-expanded priors:
 
-The pathologies of the mathematically convenient conjugate (inverse-gamma/inverse-Wishart) priors can be overcome in `MCMCglmm` by changing to what are called *parameter-expanded priors*. This is mathematically a bit complicated, but practically it boils down to specifying four parameters (`V`, `nu`, `alpha.mu`, and `alpha.mu`) instead of two. The good news is that you can generally set `V=1` and `alpha.mu=0`, which leaves only two to choose from. `alpha.V` gives the expected variance (so `sqrt(alpha.V)` is the expected standard deviation), and `nu` is now equivalent to the degrees of freedom for a $t$-distribution.
+The pathologies of the mathematically convenient conjugate (inverse-gamma/inverse-Wishart) priors can be overcome in `MCMCglmm` by changing to what are called *parameter-expanded priors* (see Section 8.0.2 in the "CourseNotes" vignette of the `MCMCglmm` package: `vignette("CourseNotes",package="MCMCglmm")` or [here](https://cran.r-project.org/web/packages/MCMCglmm/vignettes/CourseNotes.pdf). This is mathematically a bit complicated, but practically it boils down to specifying four parameters (`V`, `nu`, `alpha.mu`, and `alpha.mu`) instead of two. The good news is that you can generally set `V=1` and `alpha.mu=0`, which leaves only two to choose from. `alpha.V` gives the expected variance (so `sqrt(alpha.V)` is the expected standard deviation), and `nu` is now equivalent to the degrees of freedom for a $t$-distribution.
 Setting `V=1, nu=nu, alpha.mu = 0, alpha.V=s^2` gives a half-$t$ distribution
 with standard deviation `s` and df `nu`, e.g.:
 
@@ -197,7 +197,7 @@ brms1 <- brm(stmass~mnth*roostsitu+(1|subject),
 ```
 
 ```{r print_brms}
-print(brms1}
+print(brms1)
 ```
 
 ---
