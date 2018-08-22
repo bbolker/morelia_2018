@@ -15,7 +15,6 @@ library(lme4)
 library(glmmTMB)
 library(aods3)
 library(glmmTMB)
-library(broom)
 library(broom.mixed)
 library(dotwhisker)
 ```
@@ -111,7 +110,7 @@ $\rho$ must be >0)
 g1cs <- update(g1max,
                . ~ . - (period|herd) + (1|herd/period))
 ```
-Works fine - but is equivalent to observation-level random effects!
+Works fine - but is equivalent (in this case, where there is only one observation per herd per period) to observation-level random effects!
 
 ## gopher tortoise data
 
