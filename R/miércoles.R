@@ -22,5 +22,5 @@ confint(g1cs,parm="theta_")
 mcmcglmm2 <- MCMCglmm(stmass~mnth*roostsitu,
                       random=~subject,
                       data=dataf,
-                      nit=2e5)
-##      prior=list(G=list(list(V=1,nu=5))))
+                      nit=2e5,
+                      prior=list(G=list(list(V=1,nu=5))))

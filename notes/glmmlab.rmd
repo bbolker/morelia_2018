@@ -61,10 +61,12 @@ eigen(VarCorr(g1max)[[1]])$values
 
 Look at `?convergence` ...
 
-```{r allfit,cache=TRUE}
+```{r allfit,cache=TRUE,warning=FALSE,message=FALSE}
 source("../R/allFit.R")
 af <- allFit(g1max)
 ```
+
+(warnings/messages suppressed)
 
 We can use `summary(af)` to compare all of these fits.
 
