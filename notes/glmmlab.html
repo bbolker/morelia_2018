@@ -123,7 +123,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Mixed model lab #2 (GLMMs)</h1>
 <h4 class="author"><em>Ben Bolker</em></h4>
-<h4 class="date"><em>20:33 21 August 2018</em></h4>
+<h4 class="date"><em>20:41 21 August 2018</em></h4>
 
 </div>
 
@@ -220,7 +220,7 @@ af &lt;- allFit(g1max)</code></pre>
 \]</span> where <span class="math inline">\(\sigma^2 = \sigma^2_{\{b|1\}}+\sigma^2_{\{herd:period|1\}}\)</span>, <span class="math inline">\(\rho = \sigma^2_{\{b|1\}}/\sigma^2\)</span> (=2 parameters; <span class="math inline">\(\rho\)</span> must be &gt;0)</p>
 <pre class="r"><code>g1cs &lt;- update(g1max,
                . ~ . - (period|herd) + (1|herd/period))</code></pre>
-<p>Works fine - but is equivalent (in this case, where there is only one observation per herd per period) to observation-level random effects!</p>
+<p>The latter model is called a <strong>compound symmetry</strong> model, i.e. the variances are the same and the covariances/correlations between all pairs are the same. This is a slightly restricted version of compound symmetry, because (the way we have set it up) only non-negative correlations are possible. In general, this is a good way to simplify variation of factor effects across groups when there are many levels of the factor, and when it is plausible to treat the factor levels as exchangeable. The simplified (CS) model works fine in this example - but is equivalent (in this case, where there is only one observation per herd per period) to observation-level random effects!</p>
 </div>
 <div id="gopher-tortoise-data" class="section level2">
 <h2>gopher tortoise data</h2>

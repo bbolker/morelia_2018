@@ -110,7 +110,10 @@ $\rho$ must be >0)
 g1cs <- update(g1max,
                . ~ . - (period|herd) + (1|herd/period))
 ```
-Works fine - but is equivalent (in this case, where there is only one observation per herd per period) to observation-level random effects!
+
+The latter model is called a **compound symmetry** model, i.e. the variances are the same and the covariances/correlations between all pairs are the same. This is a slightly restricted version of compound symmetry, because (the way we have set it up) only non-negative correlations are possible.
+In general, this is a good way to simplify variation of factor effects across groups when there are many levels of the factor, and when it is plausible to treat the factor levels as exchangeable.
+The simplified (CS) model works fine in this example - but is equivalent (in this case, where there is only one observation per herd per period) to observation-level random effects!
 
 ## gopher tortoise data
 
